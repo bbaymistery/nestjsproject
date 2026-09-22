@@ -6,6 +6,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { AppLogger } from '@new-poster-parlor-api/logger';
+import { AppConfigService } from '@new-poster-parlor-api/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,7 +18,9 @@ async function bootstrap() {
 
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
-  const port = process.env.PORT || 3000;
+  const config = app.get(AppConfigService);
+
+  const port = config.appConfig.port || 3000;
   await app.listen(port);
   logger.log(`🚀 Application is running on: http://localhost:${port}/${globalPrefix}`);
 }
