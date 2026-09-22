@@ -9,7 +9,6 @@ Bu qovluqda NestJS tətbiqində baş verə biləcək fərqli xəta növlərini (
 ### 📄 1. `generic-error.handler.ts` (`handleGenericError`)
 * **Nə vaxt işləyir?** Proqnozlaşdırıla bilməyən, tutulmamış gözlənilməz JavaScript xətaları (məs: `TypeError: Cannot read property of undefined`) baş verdikdə.
 * **Qaydası:** `500 Internal Server Error` status kodu qaytarır.
-* **Təhlükəsizlik:** Production mühitində sistemin daxili xəta detallarını gizlədir, yalnız development rejimində xəta mətnini ötürür.
 
 ---
 

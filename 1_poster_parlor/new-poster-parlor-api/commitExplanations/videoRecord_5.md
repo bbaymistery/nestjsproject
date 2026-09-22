@@ -29,8 +29,12 @@ Bu sənəd **Video #5** çərçivəsində `new-poster-parlor-api` monorepo layih
 * `app.useGlobalFilters(new GlobalExceptionFilter(logger))`
 * `app.useGlobalInterceptors(new ResponseInterceptor(logger))`
 
+### 1.5. Master Arxitektura Və İcra Zənciri Sənədləşdirməsi (`README.md`)
+* `libs/utils/src/README.md` və `libs/utils/README.md` fayllarında HTTP sorğu icra zənciri (Mermaid diaqramı), Interceptor və Filter-lərin işləmə prinsipləri və proyektimiz üzrə canlı addım-addım icra ssenariləri (Uğurlu `GET /api/db-health` və Xətalı `GET /api/unknown-route`) detallı sənədləşdirildi.
+
 ---
 
 ## 🎯 2. Müəllimdən Xülasə Qeyd
 
 `libs/logger`, `libs/config` və `libs/utils` modulları tam müstəqil **Enterprise Skelet Modullardır (Boilerplate)**. Bu 3 kitabı istənilən başqa NestJS proyekti başlanğıcına təkrar-təkrar köçürüb istifadə etmək mümkündür! 🚀
+
