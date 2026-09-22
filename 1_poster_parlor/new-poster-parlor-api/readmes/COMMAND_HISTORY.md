@@ -82,4 +82,38 @@ Bu sənəddə **`new-poster-parlor-api`** monorepo layihəsində icra etdiyimiz 
 
 ---
 
+## 📌 Addım 13: Enterprise Logger Kitabxanasının (`libs/logger`) Quraşdırılması Və İnteqrasiyası
+
+* **Qoşulan Paketlər:**
+  ```sh
+  npm install winston winston-daily-rotate-file nest-winston
+  ```
+* **İcra Olunan İşlər:**
+  * `libs/logger/src/lib/logger.config.ts` faylında Winston Daily Rotate File transport-ları (`info-%DATE%.log`, `error-%DATE%.log`) və xüsusi vaxt formatı (`tsFormat`) quruldu.
+  * `libs/logger/src/lib/logger.service.ts` daxilində NestJS `NestLoggerService` interfeysini realizə edən `AppLogger` servisi yazıldı.
+  * `libs/logger/src/lib/logger.module.ts` `@Global()` dekoratoru ilə qlobal modul edildi.
+  * `apps/api/src/app/app.module.ts`-ə `LoggerModule` daxil edildi və `main.ts`-də `app.useLogger(logger)` ilə NestJS-in standart loqqeri `AppLogger` ilə əvəzləndi.
+* **Niyə İcra Etdik? (Məqsədi):**
+  * Serverdə baş verən bütün log-ları terminalda gözəl rəngli görmək, xətaları və məlumatları gündəlik olaraq `logs/` papkasına avtomatik arxivlənən fayllara yazmaq üçün.
+
+---
+
+## 📌 Addım 14: Mühit Dəyişənləri Və Config Kitabxanasının (`libs/config`) Quraşdırılması
+
+* **Düzəliş Edilən Paketlər:**
+  ```sh
+  npm install @nestjs/config@^4.0.0 class-validator class-transformer
+  ```
+* **İcra Olunan İşlər:**
+  * Node.js `ERR_REQUIRE_ESM` xətasını həll etmək üçün `@nestjs/config` paketi CommonJS dəstəkləyən sabit v4.0.0 versiyasına endirildi.
+  * `libs/config/src/lib/config.validation.ts` daxilində `class-validator` ilə sərt yoxlama qaydaları yazıldı (əskik parametr olduqda `process.exit(1)` ilə server dayandırılır).
+  * `libs/config/src/lib/config.service.ts` daxilində `appConfig`, `dbConfig`, `authConfig` kimi tip güvənli getter-lər və `7d` -> ms vaxt çeviricisi yazıldı.
+  * `libs/config/src/lib/config.module.ts` `@Global()` edildi və `NODE_ENV`-ə görə `development.env` və ya `production.env` oxunması təmin edildi.
+  * `apps/api/src/app/app.module.ts`-ə `AppConfigModule` daxil edildi və `main.ts`-də port `config.appConfig.port` üzərindən oxundu.
+* **Niyə İcra Etdik? (Məqsədi):**
+  * Tətbiq işə düşməzdən əvvəl `.env` faylındakı bütün parametrlərin mövcudluğunu və doğruluğunu yoxlamaq, xətalı parametr olarsa runtime crash-ın qarşısını almaq üçün.
+
+---
+
 *(Növbəti icra ediləcək hər bir əmr bura avtomatik əlavə olunacaq...)*
+
