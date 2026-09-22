@@ -1,18 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler, HttpStatus, } from '@nestjs/common';
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler, HttpStatus } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { AppLogger } from '@new-poster-parlor-api/logger';
 import { Request, Response } from 'express';
 import { SuccessResponse } from '@new-poster-parlor-api/shared';
 
+/**
+ * 🎯 RESPONSE INTERCEPTOR (UĞURLU CAVAB KEŞİKCİSİ)
+ * 
+ * 💡 NƏ İŞƏ YARIYIR?
+ * İstifadəçi brauzerdən sorğu atdıqda NestJS-də bu Interceptor 2 fərqli fazada (mərhələdə) işləyir:
+ * 
+ * 1️⃣ BEFORE PHASE (Kontrollerdən Əvvəl):
+ *    Sorğu kontrollerə çatmazdan əvvəl vaxtı (`startTime`) saxlayır və sorğunun məlumatlarını (URL, Method, IP) yığır.
+ * 
+ * 2️⃣ AFTER PHASE (Kontrollerdən Sonra):
+ *    Kontroller öz işini bitirib məlumat qaytaranda (məsələn: { database: { status: 'up' } }),
+ *    `next.handle().pipe(map(...))` bu cavabı tutur. Cavabın üstünə `success: true`, status kodu, dəqiq tarix 
+ *    və icra müddətini (ms) əlavə edib brauzerə təhvil verir.
+ */
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<T, SuccessResponse<T>> {
   constructor(private readonly logger: AppLogger) {
+    // Winston loqqerimizin kontekstini 'HTTP' olaraq təyin edirik
     this.logger.setContext('HTTP');
   }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<SuccessResponse<T>> {
+    // =========================================================================
+    // 🟡 1. BEFORE PHASE (GİRİŞ MƏRHƏLƏSİ — Kontroller Kodundan ƏVVƏL İcra Olunur)
+    // =========================================================================
     const ctx = context.switchToHttp();
     const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
@@ -20,16 +38,25 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, SuccessRespons
     const userAgent = headers['user-agent'] || 'unknown';
     const user = (request as any).user;
 
+    // Sorğunun daxil olduğu Kontroller və Metod adını alırıq
     const controller = context.getClass().name;
     const handler = context.getHandler().name;
+
+    // Sorğunun başladığı dəqiq vaxtı milisaniyə (ms) ilə qeyd edirik
     const startTime = Date.now();
 
+    // =========================================================================
+    // 🟢 2. AFTER PHASE (ÇIXIŞ MƏRHƏLƏSİ — next.handle() Kontrolleri İcra Edir)
+    // =========================================================================
+    // next.handle() çağırılanda NestJS sorğunu Kontrollerə ötürür.
+    // Kontroller öz işini qurtardıqdan sonra qaytardığı nəticə .pipe(map(...)) daxilinə düşür!
     return next.handle().pipe(
       map((data) => {
+        // Kontroller işini bitirdi! Neçə ms çəkdiyini hesablayırıq:
         const statusCode = response.statusCode;
         const duration = Date.now() - startTime;
 
-        // Check if response is already wrapped (has success, data, and is an ApiResponse structure)
+        // Yoxlayırıq: Bəlkə bu cavab artıq zərflənib? (success, statusCode, timestamp var?)
         const isAlreadyWrapped =
           data &&
           typeof data === 'object' &&
@@ -37,13 +64,11 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, SuccessRespons
           'statusCode' in data &&
           'timestamp' in data;
 
-        // If already wrapped, just pass through
+        // Əgər cavab artıq formata salınıbsa, olduğu kimi saxla və loq yaz
         if (isAlreadyWrapped) {
-          // Update path and timestamp if needed
           data.path = data.path || url;
           data.timestamp = data.timestamp || new Date().toISOString();
 
-          // Log successful requests
           this.logger.logWithMetadata(
             `✓ ${method} ${url} ${statusCode} - ${duration}ms`,
             {
@@ -62,7 +87,8 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, SuccessRespons
           return data;
         }
 
-        // Build success response for unwrapped data
+        // 🎁 STANDART UĞURLU ZƏRF (SUCCESS RESPONSE BUILDER)
+        // Kontrollerdən sadə obyekt qaytmışdısa (məs: { user: 'Ali' }), onu gözəl zərfə bükürük:
         const successResponse: SuccessResponse<T> = {
           success: true,
           message: 'Request successful',
@@ -71,7 +97,7 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, SuccessRespons
           path: url,
         };
 
-        // Log successful requests
+        // Loq faylımıza (logs/app-YYYY-MM-DD.log) ulduzlu yaşıl loq yazırıq:
         this.logger.logWithMetadata(
           `✓ ${method} ${url} ${statusCode} - ${duration}ms`,
           {
@@ -89,12 +115,13 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, SuccessRespons
 
         return successResponse;
       }),
+      // Əgər kontrollerdə və ya xidmətdə XƏTA (Error) atılarsa tap() bunu loqlamaq üçün tutur
       tap({
         error: (error) => {
           const duration = Date.now() - startTime;
           const statusCode = error?.status || HttpStatus.INTERNAL_SERVER_ERROR;
 
-          // Log failed requests (errors are handled by exception filter)
+          // Xətanı loqlayırıq, cavab hissəsini isə dərhal GlobalExceptionFilter-ə buraxırıq!
           this.logger.logWithMetadata(
             `✗ ${method} ${url} ${statusCode} - ${duration}ms`,
             {
@@ -114,3 +141,4 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, SuccessRespons
     );
   }
 }
+
