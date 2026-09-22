@@ -1,8 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  LoggerService as NestLoggerService,
-} from '@nestjs/common';
+import { Inject, Injectable, LoggerService as NestLoggerService } from '@nestjs/common';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 
@@ -16,8 +12,7 @@ export class AppLogger implements NestLoggerService {
     private readonly logger: Logger | { logger: Logger } // nest-winston wraps the logger
   ) {
     // Extract the actual winston logger
-    this.winstonLogger =
-      'logger' in this.logger ? this.logger.logger : this.logger;
+    this.winstonLogger = 'logger' in this.logger ? this.logger.logger : this.logger;
   }
 
   setContext(context: string) {
@@ -61,21 +56,12 @@ export class AppLogger implements NestLoggerService {
     this.winstonLogger.verbose(message, { context: ctx });
   }
 
-  logWithMetadata(
-    message: string,
-    metadata: Record<string, unknown>,
-    context?: string
-  ) {
+  logWithMetadata(message: string, metadata: Record<string, unknown>, context?: string) {
     const ctx = context || this.context || 'Application';
     this.winstonLogger.info(message, { context: ctx, ...metadata });
   }
 
-  errorWithMetadata(
-    message: string,
-    error: Error,
-    metadata?: Record<string, unknown>,
-    context?: string
-  ) {
+  errorWithMetadata(message: string, error: Error, metadata?: Record<string, unknown>, context?: string) {
     const ctx = context || this.context || 'Application';
     this.winstonLogger.error(message, {
       context: ctx,
