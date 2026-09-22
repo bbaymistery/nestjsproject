@@ -87,14 +87,29 @@ export function buildMongoConfig(config: AppConfigService): MongooseModuleFactor
 ```
 
 #### 📍 Sətir-Sətir Parametrlərin Mənaları:
-1. **`maxPoolSize` & `minPoolSize`**: 
-   * Açıq saxlanılacaq maksimum və minimum baza qoşulmalarının sayı. Məsələn, `poolSize = 10` olarsa, `minPoolSize = 2` olur. Bu, hər sorğuda yenidən bazaya qoşulmaq vaxt itkisinin qarşısını alır.
+
+1. **`maxPoolSize` & `minPoolSize` (Connection Pool - Bağlantı Hovuzu)**: 
+   * **Dərin İzah:** Hər dəfə istifadəçi gələndə sıfırdan bazaya zəng edib parol yoxlamaq 100-300ms vaxt itkisinə və serverin dondurulmasına səbəb olur.
+   * **`maxPoolSize` (10):** Pik vaxtlarda eyni anda açıq saxlanıla biləcək maksimum 10 xətt/kanal.
+   * **`minPoolSize` (2):** Hətta gece saat 3-də sayta **heç kəs girməsə belə**, arxa fonda minimum 2 dənə qoşulma xətti həmişə "isti" və hazır açıq saxlanılır. İlk gələn müştəri 0ms gecikmə ilə anında cavab alır!
+
 2. **`serverSelectionTimeoutMS: isProduction ? 30000 : 5000`**:
    * Əgər baza serveri çöksə, tətbiq neçə millisaniyə gözləsin? Production-da 30 saniyə, lokal testdə isə dərhal xəta versin deyə 5 saniyə!
+
 3. **`autoIndex: !isProduction` & `autoCreate: !isProduction`**:
    * **Production Təhlükəsizliyi:** Production-da Mongoose-un avtomatik indeks yaratmasını söndürürük (`false`). Çünki 1 milyonluq bazada avtomatik indeks yaratmaq bazanı saatlarla dondura bilər!
-4. **`compressors: ['zlib']`**:
-   * Baza ilə backend arasındakı JSON məlumatlarını sıxışdıraraq şəbəkə bandwidth-inə qənaət edir.
+
+4. **`tls: isProduction` & `tlsAllowInvalidCertificates: false`**:
+   * **Şifrələmə Və Sertifikat (TLS/SSL):** Production mühitində backend ilə MongoDB arasındakı bütün məlumat axınını HTTPS kimi şifrələyir. Keçərsiz və saxta SSL sertifikatlarını dərhal rədd edir (`tlsAllowInvalidCertificates: false`).
+
+5. **`readPreference: 'primaryPreferred'`**:
+   * **Oxuma Üstünlüyü:** Oxuma sorğularını (məs: məhsul siyahısı) əsas baza serverindən (`Primary`) et. Əgər əsas server aşırı yüklənibsə və ya müvəqqəti əlçatmazdırsa, dərhal ehtiyat nüsxə serverlərdən (`Secondary`) oxu. Oxuma sorğuları heç vaxt dayanmır!
+
+6. **`w: 'majority'` & `journal: true`**:
+   * **Məlumat İtkisinin Qarşısını Almaq (Write Concern):** Yeni məlumat yazılarkən (məs: sifariş yaradılanda) MongoDB klasterindəki serverlərin əksəriyyəti (`majority`) məlumatın yazıldığını təsdiqləyənə və jurnal faylına (`journal: true`) qeyd olunana qədər gözləyir. Elektrik kəsilsə belə, məlumat itmir.
+
+7. **`compressors: ['zlib']` & `zlibCompressionLevel: 6`**:
+   * **Şəbəkə Sıxışdırılması:** Baza ilə backend arasında gedib-gələn iri JSON məlumatlarını ZLib vasitəsilə sıxışdıraraq (1MB-lıq məlumatı 100KB-a endirərək) şəbəkə bandwidth-inə qənaət edir. `6` dərəcəsi optimal performans təmin edir.
 
 ---
 
@@ -211,7 +226,7 @@ export class DatabaseController {
 | Fayl | Müəllim Tərifi | Əsas Vəzifəsi |
 | :--- | :--- | :--- |
 | **`database.module.ts`** | ⚙️ Mərkəzi Qovşaq | `forRootAsync` və `useFactory` ilə `AppConfigService`-dən `.env`-i oxuyub Mongoose-u işə salır. |
-| **`database.config.ts`** | 🛠️ Konfiqurasiya Fabriki | Pool size, taymautlar və zlib sıxışdırmasını hesablayır. |
+| **`database.config.ts`** | 🛠️ Konfiqurasiya Fabriki | Pool size, taymautlar, TLS/SSL, Write Concern və zlib sıxışdırmasını hesablayır. |
 | **`database.connection.ts`** | 🔌 Əlaqə Dinləyici | `connected`, `error` event-lərini izləyir. |
 | **`database.monitoring.ts`** | ⏱️ Saniyəölçən | 1 saniyədən yavaş çəkən sorğuları tutur. |
 | **`database.service.ts` & `controller.ts`** | 🩺 Sağlamlıq İnspektoru | Bazanın canlı statusunu yoxlayır və `/api/db-health` endpoint-inə ötürür. |

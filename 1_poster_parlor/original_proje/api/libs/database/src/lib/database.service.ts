@@ -9,7 +9,7 @@ export class DatabaseHealthService implements OnModuleDestroy, OnModuleInit {
   private monitor!: DatabaseHealthMonitor;
   private checker!: DatabaseHealthChecker;
 
-  constructor(@InjectConnection() private readonly connection: Connection) {}
+  constructor(@InjectConnection() private readonly connection: Connection) { }
 
   async onModuleInit() {
     this.checker = new DatabaseHealthChecker(this.connection);
