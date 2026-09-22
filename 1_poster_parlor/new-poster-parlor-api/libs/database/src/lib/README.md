@@ -1,4 +1,4 @@
-# 🎓 Enterprise MongoDB Database Master Guide (`libs/database`)
+# 🎓 Enterprise MongoDB Database Master Guide (`libs/database/src/lib`)
 
 Salam tələbəm! 👨‍🏫 Əgər hind dərsliklərinə baxıb kopyaladıqdan sonra *"Burada nə baş verir, bu qədər kod nə üçündür?"* deyə düşünürsənsə, tam rahat ol! Bu ÇOX NORMALDIR. Çünki burada adi başlanğıc dərslərindəki kimi sadə `MongooseModule.forRoot('mongodb://...')` yazılmayıb. Əvəzində bank və iri elektron ticarət sistemlərində istifadə olunan **Professional Enterprise Mongoose Arxitekturası** qurulub.
 
