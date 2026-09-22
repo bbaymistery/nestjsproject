@@ -37,7 +37,7 @@ export function buildMongoConfig(config: AppConfigService): MongooseModuleFactor
         autoIndex: !isProduction,
         autoCreate: !isProduction,
 
-        tls: isProduction,
+        tls: isProduction || dburl.startsWith('mongodb+srv://'),
         tlsAllowInvalidCertificates: false,
 
         readPreference: 'primaryPreferred',
