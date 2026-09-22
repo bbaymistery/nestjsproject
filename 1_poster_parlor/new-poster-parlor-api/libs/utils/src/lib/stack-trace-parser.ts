@@ -1,30 +1,39 @@
 import { StackFrame } from '@new-poster-parlor-api/shared';
 
+/**
+ * 🕵️‍♂️ STACK TRACE PARSER (Xəta Yeri / GPS Detektivi)
+ * 
+ * 💡 NƏ İŞƏ YARIYIR?
+ * JavaScript-də xəta baş verəndə `error.stack` daxilində çox uzun, oxunması çətin olan mətn zənciri olur.
+ * Bu funksiya həmin uzun mətni Regex ilə analiz edir və yalnız bizə lazım olan
+ * **fayl adını, funksiyanı, sətir nömrəsini (line) və sütun nömrəsini (column)** təmiz massivə salır.
+ * 
+ * 🛠️ MÜHÜM XÜSUSİYYƏTİ:
+ * `node_modules` daxilindəki lüzumsuz kitabxana sətirlərini təmizləyir, yalnız BİZİM yazdığımız koddakı sətirləri saxlayır!
+ */
 export function parseStackTrace(error: Error, limit = 3): StackFrame[] {
   if (!error.stack) return [];
 
   const lines = error.stack.split('\n');
   const frames: StackFrame[] = [];
 
-  // Skip the first line (error message)
+  // İlk sətir xətanın adıdır, ona görə 1-ci sətirdən başlayırıq
   for (let i = 1; i < lines.length && frames.length < limit; i++) {
     const line = lines[i].trim();
 
-    // Match patterns like:
-    // at FunctionName (path/to/file.ts:line:column)
-    // at path/to/file.ts:line:column
+    // Regex vasitəsilə: at FunctionName (path/to/file.ts:15:4) formatını tuturur
     const match = line.match(/at\s+(?:(.+?)\s+\()?(.+?):(\d+):(\d+)\)?/);
 
     if (match) {
       const [, funcName, filePath, lineNum, colNum] = match;
 
-      // Extract only the relevant part of the file path
+      // Fayl yolunun yalnız son 3 hissəsini alırıq (Məsələn: src/service/user.service.ts)
       const cleanPath = filePath
         .split(/[/\\]/)
-        .slice(-3) // Last 3 parts: folder/subfolder/file.ts
+        .slice(-3)
         .join('/');
 
-      // Skip node_modules entries
+      // node_modules qovluğundakı kənar kitabxana sətirlərini nəzərə almırıq
       if (cleanPath.includes('node_modules')) continue;
 
       frames.push({
@@ -38,3 +47,4 @@ export function parseStackTrace(error: Error, limit = 3): StackFrame[] {
 
   return frames;
 }
+
