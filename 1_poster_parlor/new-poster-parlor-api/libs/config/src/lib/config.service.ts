@@ -34,14 +34,9 @@ export class AppConfigService {
 
   get cloudinaryConfig() {
     return {
-      cloudinaryName: this.configService.getOrThrow<string>(
-        'CLOUDINARY_CLOUD_NAME'
-      ),
-      cloudinaryApiKey:
-        this.configService.getOrThrow<string>('CLOUDINARY_API_KEY'),
-      cloudinaryApiSecret: this.configService.getOrThrow<string>(
-        'CLOUDINARY_API_SECRET'
-      ),
+      cloudinaryName: this.configService.getOrThrow<string>('CLOUDINARY_CLOUD_NAME'),
+      cloudinaryApiKey: this.configService.getOrThrow<string>('CLOUDINARY_API_KEY'),
+      cloudinaryApiSecret: this.configService.getOrThrow<string>('CLOUDINARY_API_SECRET'),
     };
   }
 
