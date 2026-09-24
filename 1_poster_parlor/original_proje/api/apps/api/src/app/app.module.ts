@@ -23,4 +23,4 @@ import { AdminModule } from '@poster-parlor-api/admin';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
