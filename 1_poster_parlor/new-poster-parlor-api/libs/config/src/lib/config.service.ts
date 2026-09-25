@@ -42,8 +42,8 @@ export class AppConfigService {
 
   get paymentConfig() {
     return {
-      razorpayKeyId: this.configService.getOrThrow<string>('RAZORPAY_API_KEY'),
-      razorpayKeySecret: this.configService.getOrThrow<string>('RAZORPAY_API_SECRET'),
+      stripePublishableKey: this.configService.getOrThrow<string>('STRIPE_PUBLISHABLE_KEY'),
+      stripeSecretKey: this.configService.getOrThrow<string>('STRIPE_SECRET_KEY'),
     };
   }
   get isDevelopment(): boolean {

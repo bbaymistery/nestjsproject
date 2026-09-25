@@ -1,34 +1,30 @@
 import { OrderDocument } from '@new-poster-parlor-api/models';
 
 export interface CreatePaymentOrderDto {
-  amount: number; // Amount in paise (INR * 100)
+  amount: number; // Amount in cents (USD * 100)
   currency?: string;
-  receipt: string;
-  notes?: Record<string, string>;
+  receipt?: string;
+  metadata?: Record<string, string>;
 }
 
-export interface RazorpayOrder {
+export interface StripePaymentIntent {
   id: string;
-  entity: string;
+  clientSecret: string;
   amount: number;
-  amount_paid: number;
-  amount_due: number;
   currency: string;
-  receipt: string;
   status: string;
-  created_at: number;
 }
 
 export interface VerifyPaymentDto {
-  razorpay_order_id: string;
-  razorpay_payment_id: string;
-  razorpay_signature: string;
+  paymentIntentId: string;
 }
 
 export interface PaymentVerificationResult {
   isValid: boolean;
-  orderId: string;
-  paymentId: string;
+  paymentIntentId: string;
+  status: string;
+  amount: number;
+  currency: string;
 }
 
 export interface PaginatedOrdersResponse {

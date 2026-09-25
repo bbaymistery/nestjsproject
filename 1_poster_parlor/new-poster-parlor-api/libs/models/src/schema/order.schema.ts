@@ -94,7 +94,7 @@ export class Order {
       method: String,
       transactionId: String,
       amount: Number,
-      currency: String,
+      currency: { type: String, default: 'USD' },
     },
   })
   paymentDetails!: PaymentDetails;

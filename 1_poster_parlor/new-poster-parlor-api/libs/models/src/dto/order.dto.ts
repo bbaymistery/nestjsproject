@@ -37,7 +37,7 @@ export class ShippingAddressDto {
   @IsNotEmpty()
   state!: string;
 
-  @IsPostalCode('IN')
+  @IsString()
   @IsNotEmpty()
   pincode!: string;
 }
@@ -48,7 +48,7 @@ export class ShippingAddressDto {
 export class PaymentDetailsDto {
   @IsString()
   @IsNotEmpty()
-  @IsIn(['ONLINE', 'COD'])
+  @IsIn(['ONLINE', 'COD', 'STRIPE'])
   method!: string;
 
   @IsString()
@@ -61,9 +61,9 @@ export class PaymentDetailsDto {
   amount!: number;
 
   @IsString()
-  @IsNotEmpty()
-  @IsIn(['INR'])
-  currency!: string;
+  @IsOptional()
+  @IsIn(['USD', 'usd', 'USD$', '$'])
+  currency?: string = 'USD';
 }
 
 /**
@@ -78,16 +78,13 @@ export class CustomerInfoDto {
   @IsOptional()
   email?: string;
 
-  @IsPhoneNumber('IN')
+  @IsString()
   @IsNotEmpty()
   phone!: string;
 }
 
 /**
  * 📦 CREATE ORDER DTO (Yeni Sifariş Yaradılması DTO-su)
- * 
- * `@ValidateNested()` — Quraşdırılmış (nested) daxili obyekti (məs: shippingAddress) yoxlamaq üçündür!
- * `@Type(() => ShippingAddressDto)` — DTO obyektinə çevirməyi təmin edir.
  */
 export class CreateOrderDto {
   @ValidateNested()
@@ -144,7 +141,7 @@ export class CreateOrderDto {
 
   @IsString()
   @IsOptional()
-  razorpayOrderId?: string;
+  paymentIntentId?: string;
 }
 
 /**
@@ -176,6 +173,10 @@ export class InitiatePaymentDto {
   @Min(0)
   @IsNotEmpty()
   totalPrice!: number;
+
+  @IsString()
+  @IsOptional()
+  currency?: string;
 }
 
 /**
@@ -184,15 +185,11 @@ export class InitiatePaymentDto {
 export class VerifyPaymentDto {
   @IsString()
   @IsNotEmpty()
-  razorpay_order_id!: string;
+  paymentIntentId!: string;
 
   @IsString()
-  @IsNotEmpty()
-  razorpay_payment_id!: string;
-
-  @IsString()
-  @IsNotEmpty()
-  razorpay_signature!: string;
+  @IsOptional()
+  currency?: string;
 
   @ValidateNested()
   @Type(() => CustomerInfoDto)

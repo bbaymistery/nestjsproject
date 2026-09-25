@@ -1,12 +1,18 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-
-import { CreateOrderDto, InitiatePaymentDto, VerifyPaymentDto, OrderStatus, } from '@new-poster-parlor-api/models';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { CreateOrderDto, InitiatePaymentDto, VerifyPaymentDto, OrderStatus, UserRole } from '@new-poster-parlor-api/models';
 import { Auth, CurrentUser } from '@new-poster-parlor-api/auth';
 import type { AuthenticatedUser } from '@new-poster-parlor-api/shared';
 import { OrdersService } from './order.service';
 import { PaymentService } from './payment.service';
-import { HttpResponseUtil, BadRequestException, } from '@new-poster-parlor-api/utils';
+import { HttpResponseUtil, BadRequestException } from '@new-poster-parlor-api/utils';
 
+/**
+ * 🛒 ORDERS CONTROLLER (Sifariş Və Ödəniş Marşrutları Giriş Qapısı)
+ * 
+ * Müəllim izahı:
+ * Bu controller müştərilərin posterləri sifariş etməsini, Stripe Sandbox ilə ödəniş başlatmasını,
+ * ödənişin doğrulanaraq bazaya saxlanmasını və sifariş tarixçəsinin gətirilməsini idarə edir.
+ */
 @Controller('order')
 export class OrdersController {
   constructor(
@@ -15,17 +21,17 @@ export class OrdersController {
   ) { }
 
   /**
-   * Get Razorpay Key ID for frontend initialization
+   * 🔑 1. `GET /api/order/payment/key`: Frontend üçün Stripe Publishable Key-i (pk_test_...) qaytarır
    */
   @Get('payment/key')
   @Auth()
   getPaymentKey() {
-    const keyId = this.paymentService.getKeyId();
-    return HttpResponseUtil.success({ keyId }, 'Payment key fetched');
+    const publishableKey = this.paymentService.getPublishableKey();
+    return HttpResponseUtil.success({ publishableKey }, 'Stripe publishable key fetched');
   }
 
   /**
-   * Initiate payment - creates a Razorpay order
+   * 💳 2. `POST /api/order/payment/initiate`: Stripe-da PaymentIntent yaradır
    */
   @Post('payment/initiate')
   @Auth()
@@ -33,21 +39,18 @@ export class OrdersController {
     @Body() dto: InitiatePaymentDto,
     @CurrentUser() user: AuthenticatedUser
   ) {
-    // Validate and calculate pricing
+    // 1. Sifarişdəki məhsulların qiymətlərini və stokunu doğrula
     const validatedPricing = await this.ordersService.validateOrderItems(dto.items);
 
-    // Create Razorpay order with total amount in paise
-    const amountInPaise = Math.round(dto.totalPrice * 100);
-    // Receipt must be <= 40 chars: use shortened user ID + timestamp
-    const shortUserId = user.id.slice(-8);
-    const timestamp = Date.now().toString(36); // Base36 for shorter string
-    const receipt = `ord_${shortUserId}_${timestamp}`;
+    // 2. Məbləği sentə (cents) çeviririk ($29.99 = 2999 cents)
+    const amountInCents = Math.round(dto.totalPrice * 100);
 
-    const razorpayOrder = await this.paymentService.createOrder({
-      amount: amountInPaise,
-      currency: 'INR',
-      receipt,
-      notes: {
+    // 3. Stripe PaymentIntent yaradırıq
+    const paymentIntent = await this.paymentService.createPaymentIntent({
+      amount: amountInCents,
+      currency: dto.currency || 'usd',
+      receipt: `ord_${user.id.slice(-8)}_${Date.now().toString(36)}`,
+      metadata: {
         userId: user.id,
         itemCount: String(dto.items.length),
         subtotal: String(validatedPricing.subtotal),
@@ -56,17 +59,18 @@ export class OrdersController {
 
     return HttpResponseUtil.success(
       {
-        orderId: razorpayOrder.id,
-        amount: razorpayOrder.amount,
-        currency: razorpayOrder.currency,
-        keyId: this.paymentService.getKeyId(),
+        paymentIntentId: paymentIntent.id,
+        clientSecret: paymentIntent.clientSecret,
+        amount: paymentIntent.amount,
+        currency: paymentIntent.currency,
+        publishableKey: this.paymentService.getPublishableKey(),
       },
-      'Payment order created'
+      'Stripe PaymentIntent created successfully'
     );
   }
 
   /**
-   * Verify payment and create order after successful Razorpay payment
+   * 🛡️ 3. `POST /api/order/payment/verify`: Stripe ödənişini doğrulayıb sifarişi bazada yaradır
    */
   @Post('payment/verify')
   @Auth()
@@ -74,52 +78,43 @@ export class OrdersController {
     @Body() dto: VerifyPaymentDto,
     @CurrentUser() user: AuthenticatedUser
   ) {
-    // Verify the payment signature
-    const verification = this.paymentService.verifyPaymentSignature({
-      razorpay_order_id: dto.razorpay_order_id,
-      razorpay_payment_id: dto.razorpay_payment_id,
-      razorpay_signature: dto.razorpay_signature,
-    });
+    // Stripe-dan ödəniş statusunu yoxlayırıq
+    const verification = await this.paymentService.verifyPaymentIntent(dto.paymentIntentId);
 
     if (!verification.isValid) {
-      throw new BadRequestException(
-        'Payment verification failed. Please contact support.'
-      );
+      throw new BadRequestException('Payment verification failed. Stripe payment not completed.');
     }
 
-    // Create the order with verified payment
+    // Sifarişi bazada yaradırıq
     const orderData: CreateOrderDto = {
       userId: user.id,
       customer: dto.customer,
       items: dto.items,
       shippingAddress: dto.shippingAddress,
       paymentDetails: {
-        method: 'ONLINE',
+        method: 'STRIPE',
         amount: dto.totalPrice,
-        currency: 'INR',
+        currency: dto.currency || 'USD',
+        transactionId: dto.paymentIntentId,
       },
-      status: OrderStatus.PROCESSING, // Auto-move to processing for paid orders
+      status: OrderStatus.PROCESSING,
       isPaid: true,
       shippingCost: dto.shippingCost,
       taxAmount: dto.taxAmount,
       totalPrice: dto.totalPrice,
       notes: dto.notes,
-      razorpayOrderId: dto.razorpay_order_id,
+      paymentIntentId: dto.paymentIntentId,
     };
 
     const order = await this.ordersService.createOrder(orderData, {
-      razorpayPaymentId: dto.razorpay_payment_id,
-      razorpayOrderId: dto.razorpay_order_id,
+      paymentIntentId: dto.paymentIntentId,
     });
 
-    return HttpResponseUtil.success(
-      order,
-      'Payment verified and order created'
-    );
+    return HttpResponseUtil.success(order, 'Payment verified and order created successfully');
   }
 
   /**
-   * Create order (for COD or direct order creation)
+   * 📦 4. `POST /api/order`: Birbaşa sifariş yaratmaq (COD / Nağd ödəniş üçün)
    */
   @Post()
   @Auth()
@@ -134,6 +129,9 @@ export class OrdersController {
     return HttpResponseUtil.success(order, 'Order created successfully');
   }
 
+  /**
+   * 📜 5. `GET /api/order`: Giriş etmiş istifadəçinin öz sifariş tarixçəsini gətirir
+   */
   @Get()
   @Auth()
   async getUserOrders(
@@ -144,14 +142,29 @@ export class OrdersController {
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 10;
 
-    const result = await this.ordersService.getOrdersByUserId(
-      user.id,
-      pageNum,
-      limitNum
-    );
-    return HttpResponseUtil.success(result, 'Orders fetched successfully');
+    const result = await this.ordersService.getOrdersByUserId(user.id, pageNum, limitNum);
+    return HttpResponseUtil.success(result, 'User orders fetched successfully');
   }
 
+  /**
+   * 👑 6. `GET /api/order/admin/all`: Bütün sifarişləri admin üçün gətirir
+   */
+  @Get('admin/all')
+  @Auth(UserRole.ADMIN)
+  async getAllOrders(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string
+  ) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 10;
+
+    const result = await this.ordersService.getAllOrders(pageNum, limitNum);
+    return HttpResponseUtil.success(result, 'All orders fetched successfully');
+  }
+
+  /**
+   * 🔍 7. `GET /api/order/:id`: Tək bir sifarişin detallarını gətirir
+   */
   @Get(':id')
   @Auth()
   async getOrderById(
@@ -160,5 +173,18 @@ export class OrdersController {
   ) {
     const order = await this.ordersService.getOrderById(orderId, user.id);
     return HttpResponseUtil.success(order, 'Order fetched successfully');
+  }
+
+  /**
+   * 👑 8. `PUT /api/order/admin/:id/status`: Admin sifarişin statusunu yeniləyir
+   */
+  @Put('admin/:id/status')
+  @Auth(UserRole.ADMIN)
+  async updateOrderStatus(
+    @Param('id') orderId: string,
+    @Body('status') status: OrderStatus
+  ) {
+    const updatedOrder = await this.ordersService.updateOrderStatus(orderId, status);
+    return HttpResponseUtil.success(updatedOrder, 'Order status updated successfully');
   }
 }

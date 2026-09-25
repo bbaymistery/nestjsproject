@@ -91,14 +91,14 @@ class EnvironmentVaribale {
   @IsNotEmpty({ message: 'CLOUDINARY_API_SECRETs is required' })
   CLOUDINARY_API_SECRET!: string;
 
-  /* ---------------- Razorpay ---------------- */
-  @IsString({ message: 'RAZORPAY_KEY_ID must be a valid string' })
-  @IsNotEmpty({ message: 'RAZORPAY_KEY_ID is required' })
-  RAZORPAY_API_KEY!: string;
+  /* ---------------- Stripe ---------------- */
+  @IsString({ message: 'STRIPE_PUBLISHABLE_KEY must be a valid string' })
+  @IsNotEmpty({ message: 'STRIPE_PUBLISHABLE_KEY is required' })
+  STRIPE_PUBLISHABLE_KEY!: string;
 
-  @IsString({ message: 'RAZORPAY_KEY_SECRET must be a valid string' })
-  @IsNotEmpty({ message: 'RAZORPAY_KEY_SECRET is required' })
-  RAZORPAY_API_SECRET!: string;
+  @IsString({ message: 'STRIPE_SECRET_KEY must be a valid string' })
+  @IsNotEmpty({ message: 'STRIPE_SECRET_KEY is required' })
+  STRIPE_SECRET_KEY!: string;
 }
 
 const logger = new Logger('ConfigValidation');

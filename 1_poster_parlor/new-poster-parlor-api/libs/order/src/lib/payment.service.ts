@@ -3,94 +3,106 @@ import { AppConfigService } from '@new-poster-parlor-api/config';
 import {
   CreatePaymentOrderDto,
   PaymentVerificationResult,
-  RazorpayOrder,
-  VerifyPaymentDto,
+  StripePaymentIntent,
 } from '@new-poster-parlor-api/shared';
-import Razorpay from 'razorpay';
-import crypto from 'crypto';
+import Stripe from 'stripe';
+
+/**
+ * 💳 PAYMENT SERVICE (Stripe Sandbox Ödəniş Servisi)
+ * 
+ * Müəllim izahı:
+ * Bu servis Stripe Sandbox (Test Rejimi) vasitəsilə təhlükəsiz online ödənişləri idarə edir.
+ * Müştəri sifariş edərkən Stripe PaymentIntent yaradılır, frontend clientSecret ilə kart məlumatlarını
+ * daxil edir və backend-də ödənişin statusu saniyələr daxilində doğrulanır.
+ */
 @Injectable()
 export class PaymentService {
-  private razorpay: Razorpay;
+  private stripe: Stripe;
 
   constructor(private readonly configService: AppConfigService) {
-    const { razorpayKeyId, razorpayKeySecret } =
-      this.configService.paymentConfig;
+    const { stripeSecretKey } = this.configService.paymentConfig;
 
-    this.razorpay = new Razorpay({
-      key_id: razorpayKeyId,
-      key_secret: razorpayKeySecret,
-    });
+    // Stripe SDK-sını gizli test açarı (sk_test_...) ilə inicializasiya edirik
+    this.stripe = new Stripe(stripeSecretKey);
   }
 
   /**
-   * Get Razorpay Key ID for frontend
+   * 🔑 1. `getPublishableKey()`: Frontend üçün Stripe açıq açarını (pk_test_...) qaytarır
    */
-  getKeyId(): string {
-    return this.configService.paymentConfig.razorpayKeyId;
+  getPublishableKey(): string {
+    return this.configService.paymentConfig.stripePublishableKey;
   }
 
   /**
-   * Create a Razorpay order for payment
-   * @param dto - Payment order details
-   * @returns Razorpay order object
+   * 💳 2. `createPaymentIntent(dto)`: Stripe serverində yeni ödəniş niyyəti (PaymentIntent) yaradır
+   * @param dto Məbləğ (Sent / Cent ilə) və valyuta (USD, EUR və s.)
+   * @returns PaymentIntent ID və clientSecret (frontend ödəniş pəncərəsi üçün)
    */
-  async createOrder(dto: CreatePaymentOrderDto): Promise<RazorpayOrder> {
+  async createPaymentIntent(dto: CreatePaymentOrderDto): Promise<StripePaymentIntent> {
     try {
-      const options = {
-        amount: Math.round(dto.amount), // Amount should already be in paise
-        currency: dto.currency || 'INR',
-        receipt: dto.receipt,
-        notes: dto.notes || {},
+      // Stripe məbləği tam sent (cents) kimi qəbul edir ($10 = 1000 cents)
+      const amountInCents = Math.round(dto.amount);
+
+      const paymentIntent = await this.stripe.paymentIntents.create({
+        amount: amountInCents,
+        currency: (dto.currency || 'usd').toLowerCase(),
+        automatic_payment_methods: {
+          enabled: true,
+        },
+        metadata: dto.metadata || {},
+      });
+
+      return {
+        id: paymentIntent.id,
+        clientSecret: paymentIntent.client_secret || '',
+        amount: paymentIntent.amount,
+        currency: paymentIntent.currency,
+        status: paymentIntent.status,
       };
-
-      const order = (await this.razorpay.orders.create(
-        options
-      )) as RazorpayOrder;
-
-      return order;
-    } catch (error) {
+    } catch (error: unknown) {
+      const err = error;
       throw new BadRequestException(
-        'Failed to create payment order. Please try again.'
+        `Failed to create Stripe PaymentIntent: ${err || 'Payment service error'}`
       );
     }
   }
 
   /**
-   * Verify payment signature from Razorpay callback
-   * @param dto - Payment verification data
-   * @returns Verification result
+   * 🛡️ 3. `verifyPaymentIntent(paymentIntentId)`: Stripe-dan ödənişin uğurla tamamlandığını yoxlayır
+   * @param paymentIntentId Stripe PaymentIntent ID-si (məsələn: "pi_3MtwBwLkdIwHu7ix08aD5xYc")
    */
-  verifyPaymentSignature(dto: VerifyPaymentDto): PaymentVerificationResult {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = dto;
+  async verifyPaymentIntent(paymentIntentId: string): Promise<PaymentVerificationResult> {
+    try {
+      const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
 
-    const { razorpayKeySecret } = this.configService.paymentConfig;
+      // Status 'succeeded' və ya 'requires_capture' olarsa ödəniş uğurludur!
+      const isValid = paymentIntent.status === 'succeeded' || paymentIntent.status === 'requires_capture';
 
-    // Create the expected signature
-    const body = razorpay_order_id + '|' + razorpay_payment_id;
-    const expectedSignature = crypto
-      .createHmac('sha256', razorpayKeySecret)
-      .update(body.toString())
-      .digest('hex');
-
-    const isValid = expectedSignature === razorpay_signature;
-
-    return {
-      isValid,
-      orderId: razorpay_order_id,
-      paymentId: razorpay_payment_id,
-    };
+      return {
+        isValid,
+        paymentIntentId: paymentIntent.id,
+        status: paymentIntent.status,
+        amount: paymentIntent.amount,
+        currency: paymentIntent.currency,
+      };
+    } catch (error: unknown) {
+      const err = error as Error;
+      throw new BadRequestException(
+        `Failed to verify Stripe PaymentIntent: ${err?.message || 'Verification failed'}`
+      );
+    }
   }
 
   /**
-   * Fetch payment details from Razorpay
-   * @param paymentId - Razorpay payment ID
+   * 🔍 4. `getPaymentDetails(paymentIntentId)`: Stripe-dan ödənişin ətraflı məlumatlarını gətirir
    */
-  async getPaymentDetails(paymentId: string) {
+  async getPaymentDetails(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
     try {
-      const payment = await this.razorpay.payments.fetch(paymentId);
-      return payment;
-    } catch (error) {
-      throw new BadRequestException('Failed to fetch payment details');
+      const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+      return paymentIntent;
+    } catch (error: unknown) {
+      const err = error as Error;
+      throw new BadRequestException(`Failed to fetch payment details from Stripe ${err?.message || 'getPaymentDetails failed'}`);
     }
   }
 }
