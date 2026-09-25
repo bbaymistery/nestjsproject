@@ -71,10 +71,7 @@ export class PaymentService {
    * 🛡️ 3. `verifyPaymentIntent(paymentIntentId)`: Stripe-dan ödənişin uğurla tamamlandığını yoxlayır
    * @param paymentIntentId Stripe PaymentIntent ID-si (məsələn: "pi_3MtwBwLkdIwHu7ix08aD5xYc")
    */
-  async verifyPaymentIntent(
-    paymentIntentId: string,
-    sandbox?: boolean
-  ): Promise<PaymentVerificationResult> {
+  async verifyPaymentIntent(paymentIntentId: string, sandbox?: boolean): Promise<PaymentVerificationResult> {
     try {
       const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
 
@@ -83,9 +80,9 @@ export class PaymentService {
         paymentIntent.status === 'succeeded' ||
         paymentIntent.status === 'requires_capture';
 
-      // 💡 Əgər sorğuda (Postman və ya Client) explicit olaraq `sandbox: true` göndərilibsə (və ya dev rejimindədirsə), test sınaqlarına icazə verilir
+      // 💡 Əgər sorğuda (Postman və ya Client) explicit olaraq `sandbox: true` göndərilibsə, test sınaqlarına icazə verilir
       const isSandboxAllowed =
-        (sandbox === true || (sandbox === undefined && this.configService.isDevelopment)) &&
+        sandbox === true &&
         (paymentIntent.status === 'requires_payment_method' ||
           paymentIntent.status === 'requires_confirmation');
 
