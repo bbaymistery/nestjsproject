@@ -22,13 +22,19 @@ Bu sənəd **Review API-lərini (Rəy yazmaq, Ulduz balı vermək, Şəkil yükl
 * **URL**: `http://localhost:3000/api/review/673f1a2b3c4d5e6f7a8b9c0d` *(Bu `:posterId` yuxarıda yaradılmış Poster ID-sidir)*
 * **Auth**: 🔐 `@Auth()` (Giriş etmiş istifadəçi tokeni)
 * **Body Tip**: **`form-data`** ⚠️ *(Şəkil yükləmək üçün `form-data` seçilir)*
+
+💡 **💡 Mühüm Məntiq (Poster Şəkli vs Rəy Şəkli)**:
+* 🖼️ **Poster-in Şəkilləri (`posters` kolleksiyası)**: Admin tərəfindən məhsul yaradılarkən yüklənən rəsmi məhsul fotosudur.
+* 📸 **Rəy-in Şəkilləri (`reviews` kolleksiyası)**: Müştərinin (İstifadəçinin) evində posteri divara asıb telefonla çəkdiyi fotosudur! *(Məsələn: Müştəri posteri aldı, divarından asdı, fotosunu çəkdi və rəy bölməsinə yapışdırdı)*.
+* ⚠️ **Qeyd**: `images` sahəsi məcburi deyil (isteğə bağlıdır / optional). Şəkil seçməsəniz də rəy yaradılacaq.
+
 * **Form-data Parameterləri**:
 
 | Key (Açar) | Type | Value (Nümunə Dəyər) | Izah |
 | :--- | :--- | :--- | :--- |
-| `rating` | Text | `5` | 1-dən 5-dək ulduz balı |
+| `rating` | Text | `5` | 1-dən 5-dək ulduz balı (Məcburi) |
 | `comment` | Text | `Mohtesem keyfiyyetli posterdir, cox bəyəndim!` | Rəy mətni |
-| `images` | **File** | *(Kompüterdən max 5 şəkil seçin)* | 📸 Cloudinary-yə yüklənəcək rəy şəkilləri |
+| `images` | **File** | *(Kompüterdən max 5 şəkil seçin)* | 📸 Cloudinary-yə yüklənəcək rəy şəkilləri (Optional) |
 
 * **Cavab (201 Created)**:
   ```json
