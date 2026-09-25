@@ -150,10 +150,12 @@ Layihə serverə (məsələn: Render / AWS) qalxıb Production rejiminə keçən
     "shippingCost": 5,
     "taxAmount": 6,
     "totalPrice": 70.98,
-    "notes": "Qapıda zəng edin"
+    "notes": "Qapıda zəng edin",
+    "sandbox": true
   }
   ```
 * **Cavab (200 OK)**: Sifariş yaratdı, stok azaldı və `status: "PROCESSING"`, `isPaid: true` kimi saxlanıldı!
+* 🧪 **`sandbox: true` Flaqı**: Postman-da test edərkən body-də `"sandbox": true` göndərə bilərsiniz. Əgər `"sandbox": false` və ya heç göndərilməzsə, backend bunu yalnız canlı/reallaşmış kart ödənişi kimi tələb edəcək!
 
 > [!IMPORTANT]
 > **Postman-da TEST 3 (`verify`) Sınağının Keçməsi Üçün (Stripe Dashboard Təsdiqi):**

@@ -17,6 +17,7 @@ export interface StripePaymentIntent {
 
 export interface VerifyPaymentDto {
   paymentIntentId: string;
+  sandbox?: boolean;
 }
 
 export interface PaymentVerificationResult {

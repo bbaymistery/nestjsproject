@@ -16,7 +16,7 @@ Bu sənəd **Video #9** çərçivəsində `new-poster-parlor-api` monorepo layih
 ### 1.2. Stripe Ödəniş Servisi (`libs/order/src/lib/payment.service.ts`)
 * **`getPublishableKey()`**: Frontend üçün Stripe açıq test açarını qaytarır.
 * **`createPaymentIntent(dto)`**: Məbləği avtomatik sentə (cents e.g. `$29.99` = `2999` cents) çevirərək Stripe serverində `PaymentIntent` yaradır.
-* **`verifyPaymentIntent(paymentIntentId)`**: Stripe serverinə sorğu göndərərək ödənişin statusunu (`succeeded` / `requires_capture`) yoxlayır və təsdiqləyir.
+* **`verifyPaymentIntent(paymentIntentId, sandbox)`**: Stripe serverinə sorğu göndərərək ödənişin statusunu (`succeeded` / `requires_capture`) yoxlayır. Əgər sorğuda `sandbox: true` göndərilibsə, Postman testlərinə kart widget-ı olmadan icra imkanı yaradır.
 * **`getPaymentDetails(paymentIntentId)`**: Ödənişin bütün detallarını Stripe-dan gətirir.
 
 ### 1.3. Sifariş Biznes Loqikası Və Stok Azaldılması (`libs/order/src/lib/order.service.ts`)

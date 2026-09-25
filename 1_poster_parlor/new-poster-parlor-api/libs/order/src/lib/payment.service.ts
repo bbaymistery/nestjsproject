@@ -71,19 +71,25 @@ export class PaymentService {
    * 🛡️ 3. `verifyPaymentIntent(paymentIntentId)`: Stripe-dan ödənişin uğurla tamamlandığını yoxlayır
    * @param paymentIntentId Stripe PaymentIntent ID-si (məsələn: "pi_3MtwBwLkdIwHu7ix08aD5xYc")
    */
-  async verifyPaymentIntent(paymentIntentId: string): Promise<PaymentVerificationResult> {
+  async verifyPaymentIntent(
+    paymentIntentId: string,
+    sandbox?: boolean
+  ): Promise<PaymentVerificationResult> {
     try {
       const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
 
-      // 💡 QAYDA: Status 'succeeded', 'requires_capture', və ya Development (Sandbox / Postman) rejimində test üçün keçərlidir.
-      // 📌 Məqsəd: Postman-da frontend (kredit kartı widget-i) olmadığı üçün isDevelopment rejimində Postman sınaqları 200 OK alsın.
-      // 🔒 Production-da (NODE_ENV=production) isDevelopment=false olur və ancaq və ancaq 'succeeded' qəbul olunur!
-      const isValid =
+      // Standart canlı/reallaşmış ödəniş təsdiqi ('succeeded' və ya 'requires_capture')
+      const isStrictSuccess =
         paymentIntent.status === 'succeeded' ||
-        paymentIntent.status === 'requires_capture' ||
-        (this.configService.isDevelopment &&
-          (paymentIntent.status === 'requires_payment_method' ||
-            paymentIntent.status === 'requires_confirmation'));
+        paymentIntent.status === 'requires_capture';
+
+      // 💡 Əgər sorğuda (Postman və ya Client) explicit olaraq `sandbox: true` göndərilibsə (və ya dev rejimindədirsə), test sınaqlarına icazə verilir
+      const isSandboxAllowed =
+        (sandbox === true || (sandbox === undefined && this.configService.isDevelopment)) &&
+        (paymentIntent.status === 'requires_payment_method' ||
+          paymentIntent.status === 'requires_confirmation');
+
+      const isValid = isStrictSuccess || isSandboxAllowed;
 
       return {
         isValid,

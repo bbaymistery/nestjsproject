@@ -225,5 +225,9 @@ export class VerifyPaymentDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  sandbox?: boolean;
 }
 

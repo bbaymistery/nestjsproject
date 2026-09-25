@@ -78,8 +78,11 @@ export class OrdersController {
     @Body() dto: VerifyPaymentDto,
     @CurrentUser() user: AuthenticatedUser
   ) {
-    // Stripe-dan ödəniş statusunu yoxlayırıq
-    const verification = await this.paymentService.verifyPaymentIntent(dto.paymentIntentId);
+    // Stripe-dan ödəniş statusunu yoxlayırıq (dto.sandbox parametri ilə test və ya canlı rejim tənzimlənir)
+    const verification = await this.paymentService.verifyPaymentIntent(
+      dto.paymentIntentId,
+      dto.sandbox
+    );
 
     if (!verification.isValid) {
       throw new BadRequestException('Payment verification failed. Stripe payment not completed.');
