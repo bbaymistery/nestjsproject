@@ -14,7 +14,7 @@ import { UploadApiResponse } from 'cloudinary';
  */
 @Injectable()
 export class InventoryService {
-  private ERROR = 'INVENTROY_ERROR';
+  private ERROR = 'INVENTORY_ERROR';
 
   constructor(
     private readonly cloudinaryService: CloudinaryService,

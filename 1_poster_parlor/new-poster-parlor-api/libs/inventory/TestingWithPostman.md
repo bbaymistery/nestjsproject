@@ -64,9 +64,9 @@ Inventory API-lərində məhsul əlavə etmək, yeniləmək və silmək yalnız 
 
 ---
 
-### 📊 TEST 3: Filtr Menyusu Statistiki Məlumatları (`GET /api/inventory/filters`)
+### 📊 TEST 3: Filtr Menyusu Statistiki Məlumatları (`GET /api/inventory/categories/list`)
 * **Method**: `GET`
-* **URL**: `http://localhost:3000/api/inventory/filters`
+* **URL**: `http://localhost:3000/api/inventory/categories/list`
 * **Auth**: 🔓 `@Public()`
 
 ---
