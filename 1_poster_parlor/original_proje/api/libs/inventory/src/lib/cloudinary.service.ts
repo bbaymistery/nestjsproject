@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AppConfigService } from '@poster-parlor-api/config';
 import { FileStructure } from '@poster-parlor-api/shared';
-import {
-  v2 as cloudinary,
-  DeleteApiResponse,
-  UploadApiResponse,
-} from 'cloudinary';
+import { v2 as cloudinary, DeleteApiResponse, UploadApiResponse, } from 'cloudinary';
 import { CustomHttpException } from '@poster-parlor-api/utils';
 import { Readable } from 'stream';
 @Injectable()
