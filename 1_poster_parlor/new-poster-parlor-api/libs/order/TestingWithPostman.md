@@ -86,9 +86,9 @@ Vebsayt tətbiqində `"sandbox": true` parametri göndərilmir (və ya `sandbox:
   {
     "items": [
       {
-        "posterId": "673f1a2b3c4d5e6f7a8b9c0d",
-        "quantity": 2,
-        "price": 29.99
+        "posterId": "6ab62cbe7b320c5cc4ae8716",
+        "quantity": 3,
+        "price": 34.99
       }
     ],
     "shippingAddress": {
@@ -98,8 +98,8 @@ Vebsayt tətbiqində `"sandbox": true` parametri göndərilmir (və ya `sandbox:
       "pincode": "AZ1000"
     },
     "shippingCost": 5,
-    "taxAmount": 6,
-    "totalPrice": 70.98,
+    "taxAmount": 10.50,
+    "totalPrice": 120.47,
     "currency": "usd"
   }
   ```
@@ -111,7 +111,7 @@ Vebsayt tətbiqində `"sandbox": true` parametri göndərilmir (və ya `sandbox:
     "data": {
       "paymentIntentId": "pi_3MtwBwLkdIwHu7ix08aD5xYc",
       "clientSecret": "pi_3MtwBwLkdIwHu7ix08aD5xYc_secret_xyz123",
-      "amount": 7098,
+      "amount": 12047,
       "currency": "usd"
     }
   }
@@ -135,9 +135,9 @@ Vebsayt tətbiqində `"sandbox": true` parametri göndərilmir (və ya `sandbox:
     },
     "items": [
       {
-        "posterId": "673f1a2b3c4d5e6f7a8b9c0d",
-        "quantity": 2,
-        "price": 29.99
+        "posterId": "6ab62cbe7b320c5cc4ae8716",
+        "quantity": 3,
+        "price": 34.99
       }
     ],
     "shippingAddress": {
@@ -147,8 +147,8 @@ Vebsayt tətbiqində `"sandbox": true` parametri göndərilmir (və ya `sandbox:
       "pincode": "AZ1000"
     },
     "shippingCost": 5,
-    "taxAmount": 6,
-    "totalPrice": 70.98,
+    "taxAmount": 10.50,
+    "totalPrice": 120.47,
     "notes": "Qapıda zəng edin",
     "sandbox": true
   }
