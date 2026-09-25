@@ -30,26 +30,25 @@ Müştəri kart nömrəsini daxil edib "Ödə" düyməsini sıxır. 1-ci addımd
 
 ---
 
-## 🛡️ Frontend Vebsayt vs Postman vs Production Təhlükəsizliyi İzahı
+## 🛡️ Frontend Vebsayt vs Postman (Sandbox) Təhlükəsizliyi İzahı
 
 > [!NOTE]
-> **Kod Məkanı**: Məhz bu məntiq [payment.service.ts](file:///c:/Users/User/Desktop/nest_js_projects/1_poster_parlor/new-poster-parlor-api/libs/order/src/lib/payment.service.ts#L78-L88) faylının `verifyPaymentIntent` metodu daxilində tətbiq olunub.
+> **Kod Məkanı**: Məhz bu məntiq [payment.service.ts](file:///c:/Users/User/Desktop/nest_js_projects/1_poster_parlor/new-poster-parlor-api/libs/order/src/lib/payment.service.ts#L78-L90) faylının `verifyPaymentIntent` metodu daxilində tətbiq olunub.
 
 1️⃣ **Frontend Vebsaytda (Netlify / Vercel Və ya Lokalda) Necə Olacaq?**
 Vebsayt tərəfi hazır olduqda (istər lokaldan açılsın, istərsə də Netlify-dan):
 * Müştəri "Ödəniş et" düyməsini basanda ekranda rəsmi Stripe Kredit Kartı pəncərəsi (Stripe Elements) açılacaq.
 * Sən həmin pəncərəyə Stripe-ın pulsuz test kartını (`4242 4242 4242 4242`, CVC: `123`, Tarix: `12/28`) yazacaqsan.
 * Stripe ödənişi həqiqətən icra edəcək və status `succeeded` (Uğurlu) olacaq.
-* Vebsayt backend-ə `verify` göndərəcək VƏ backend ödənişin həqiqətən keçdiyini doğrulayıb sifarişi yaradacaq!
+* Vebsayt backend-ə `verify` göndərəcək (və `"sandbox": true` göndərməyəcək) VƏ backend ödənişin həqiqətən keçdiyini doğrulayıb sifarişi yaradacaq!
 
-2️⃣ **Bəs Biz Niyə Postman Üçün Bu Şərti (`isDevelopment`) Yazdıq?**
+2️⃣ **Bəs Biz Niyə Postman Üçün `"sandbox": true` Parametrini Yazdıq?**
 Çünki Postman bir vebsayt deyil! Postman-ın daxilində brauzer kimi kart nömrəsi daxil etmək üçün pəncərə (widget) yoxdur.
-Mən bu şərti ona görə əlavə etdim ki, sən hələ Frontend vebsaytı yazılmadan öncə, sırf Postman-da backend-in tam doğru işlədiyini sınaqdan keçirə biləsən!
+Sorğuda `"sandbox": true` göndərildikdə, backend bunu sırf test sınağı kimi qəbul edir VƏ kart widget-ı olmadan ödənişi 200 OK ilə təsdiqləyib sifarişi yaratmağa icazə verir!
 
-3️⃣ **Production-da (İstehsalatda) Təhlükəsizlik Necə Olacaq?**
-Layihə serverə (məsələn: Render / AWS) qalxıb Production rejiminə keçəndə (`NODE_ENV=production` olduqda):
-* `isDevelopment` avtomatik olaraq `false` olur.
-* Backend həmin test güzəştini bağlayır və ancaq və ancaq kartla real ödənilmiş (`status === 'succeeded'`) ödənişləri qəbul edir.
+3️⃣ **Canlı (Production) Vebsaytda Təhlükəsizlik Necə Olacaq?**
+Vebsayt tətbiqində `"sandbox": true` parametri göndərilmir (və ya `sandbox: false` olur):
+* Backend güzəşt etmir və ancaq və ancaq kartla real ödənilmiş (`status === 'succeeded'`) ödənişləri qəbul edir.
 * Yəni sistemimiz həm Postman testlərin üçün çox rahatdır, həm də canlı tətbiq üçün 100% təhlükəsizdir! 🚀
 
 ---
