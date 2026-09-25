@@ -29,6 +29,11 @@
                              ▼
  ┌────────────────────────────────────────────────────────┐
  │ 5️⃣  lib/inventorymodule.md (NestJS Modul Bağlantıları)  │
+ └───────────────────────────┬────────────────────────────┘
+                             │
+                             ▼
+ ┌────────────────────────────────────────────────────────┐
+ │ 🧪 6️⃣  TestingWithPostman.md (Postman Test Bələdçisi)  │
  └────────────────────────────────────────────────────────┘
 ```
 
@@ -50,4 +55,8 @@
 
 ### 4️⃣ [lib/inventorymodule.md](file:///c:/Users/User/Desktop/nest_js_projects/1_poster_parlor/new-poster-parlor-api/libs/inventory/src/lib/inventorymodule.md)
 * **Mövzu**: `InventoryModule` — Komponentlərin NestJS DI konteynerində birləşməsi.
+* **Status**: ✅ **Tamamlandı!**
+
+### 🧪 5️⃣ [TestingWithPostman.md](file:///c:/Users/User/Desktop/nest_js_projects/1_poster_parlor/new-poster-parlor-api/libs/inventory/TestingWithPostman.md)
+* **Mövzu**: Postman ilə Inventory API-lərini step-by-step test etmək bələdçisi.
 * **Status**: ✅ **Tamamlandı!**
