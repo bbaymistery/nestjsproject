@@ -58,6 +58,7 @@ export class AddPosterDto {
   @IsOptional()
   description?: string;
 
+  @Transform(parseNumber)
   @IsNumber()
   @IsNotEmpty()
   price!: number;
@@ -70,14 +71,17 @@ export class AddPosterDto {
   @IsOptional()
   material?: string;
 
+  @Transform(parseBoolean)
   @IsBoolean()
   @IsNotEmpty()
   isAvailable!: boolean;
 
+  @Transform(parseJsonArray)
+  @IsArray()
   @IsString({ each: true })
-  @IsNotEmpty({ each: true })
   tags!: string[];
 
+  @Transform(parseNumber)
   @IsNumber()
   @IsNotEmpty()
   stock!: number;

@@ -1,6 +1,6 @@
 # 🧪 Postman ilə Inventory (Məhsul İdarəetməsi) API-lərini Test Etmək Bələdçisi
 
-Bu sənəd **Inventory API-lərini (Məhsul yaradılması, Cloudinary şəkil yükləməsi, Mongoose filtrləri, Yeniləmə və Silmə)** Postman-da addım-addım necə test edəcəyinizi izah edir.
+Bu sənəd **Inventory API-lərini (Məhsul yaradılması, Cloudinary şəkil yükləməsi, Mongoose filtrləri, Yeniləmə və Silmə)** Postman-da addım-addım necə test edəcəyinizi 100% dəqiq sahələrlə izah edir.
 
 ---
 
@@ -23,18 +23,19 @@ Inventory API-lərində məhsul əlavə etmək, yeniləmək və silmək yalnız 
 * **URL**: `http://localhost:3000/api/inventory`
 * **Auth**: `@Auth(UserRole.ADMIN)` (Admin tokeni lazımdır)
 * **Body Tip**: **`form-data`** ⚠️ *(JSON deyil! Çünki şəkil faylları göndəririk)*
-* **Form-data Parameterləri**:
+* **Form-data Parameterləri (MƏCBURİ SAHƏLƏR)**:
 
-| Key (Açar) | Type | Value (Nümunə Dəyər) | Izah |
+| Key (Açar) | Type | Value (Dəqiq Dəyər) | Izah / Tələb |
 | :--- | :--- | :--- | :--- |
-| `title` | Text | `Cyberpunk Neon Poster` | Məhsulun adı |
-| `description` | Text | `Stunning neon style poster` | Təsviri |
-| `price` | Text | `29.99` | Qiymət |
-| `stock` | Text | `50` | Stok sayı |
-| `category` | Text | `Sci-Fi` | Kateqoriya |
-| `material` | Text | `Canvas` | Material |
-| `size` | Text | `A2` | Ölçü |
-| `tags` | Text | `neon,cyberpunk,scifi` | Etiketlər |
+| `title` | Text | `Cyberpunk Neon Poster` | Məhsulun adı (Məcburi) |
+| `description` | Text | `Stunning neon style poster` | Təsviri (Optional) |
+| `price` | Text | `29.99` | Qiymət (Məcburi number) |
+| `dimensions` | Text | `50x70 cm` | Ölçü / Ölçülər (Məcburi string, `size` YOX!) |
+| `material` | Text | `Canvas` | Material (Optional) |
+| `isAvailable` | Text | `true` | Satışda var? (`true` / `false` Məcburi boolean) |
+| `tags` | Text | `["neon", "cyberpunk"]` | Etiketlər (Məcburi array/json) |
+| `stock` | Text | `50` | Stok sayı (Məcburi number) |
+| `category` | Text | `Sci-Fi` | Kateqoriya (Məcburi) |
 | `images` | **File** | *(Kompüterinizdən 1 və ya bir neçə şəkil seçin)* | 📸 Cloudinary-yə yüklənəcək |
 
 * **Cavab (201 Created)**:
@@ -43,6 +44,8 @@ Inventory API-lərində məhsul əlavə etmək, yeniləmək və silmək yalnız 
     "_id": "673f1a2b3c4d5e6f7a8b9c0d",
     "title": "Cyberpunk Neon Poster",
     "price": 29.99,
+    "dimensions": "50x70 cm",
+    "isAvailable": true,
     "images": [
       {
         "url": "https://res.cloudinary.com/.../image.jpg",
@@ -58,24 +61,6 @@ Inventory API-lərində məhsul əlavə etmək, yeniləmək və silmək yalnız 
 * **Method**: `GET`
 * **URL**: `http://localhost:3000/api/inventory?page=1&limit=10&category=Sci-Fi&minPrice=10&maxPrice=50&search=neon`
 * **Auth**: 🔓 `@Public()` (Hər kəs üçün açıqdır)
-* **Params**:
-  * `page`: `1`
-  * `limit`: `10`
-  * `category`: `Sci-Fi`
-  * `search`: `neon`
-  * `minPrice`: `10`
-  * `maxPrice`: `50`
-* **Cavab (200 OK)**:
-  ```json
-  {
-    "items": [...],
-    "pagination": {
-      "currentPage": 1,
-      "totalPages": 1,
-      "totalItems": 1
-    }
-  }
-  ```
 
 ---
 
@@ -83,8 +68,6 @@ Inventory API-lərində məhsul əlavə etmək, yeniləmək və silmək yalnız 
 * **Method**: `GET`
 * **URL**: `http://localhost:3000/api/inventory/filters`
 * **Auth**: 🔓 `@Public()`
-* **Cavab (200 OK)**:
-  Frontend üçün kateqoriyalar, materiallar, ölçülər və max/min qiymətləri qaytarır.
 
 ---
 
@@ -100,16 +83,11 @@ Inventory API-lərində məhsul əlavə etmək, yeniləmək və silmək yalnız 
 * **URL**: `http://localhost:3000/api/inventory/673f1a2b3c4d5e6f7a8b9c0d`
 * **Auth**: `@Auth(UserRole.ADMIN)`
 * **Body Tip**: **`form-data`**
-* **Rejim A (Köhnə şəkilləri dəyişmədən yeni şəkil əlavə etmək)**:
+* **Form-data Parameterləri**:
   * `price`: `34.99`
+  * `isAvailable`: `true`
   * `images`: *(Yeni şəkil faylı seçin)*
-  * `imageAction`: `keep`
-* **Rejim B (Müəyyən şəkilləri silmək)**:
-  * `imageAction`: `keep`
-  * `imagesToDelete`: `poster_parlor/inventory/silinmeli_public_id`
-* **Rejim C (Bütün şəkilləri tam əvəz etmək)**:
-  * `imageAction`: `replace`
-  * `images`: *(Tam yeni şəkillər)*
+  * `imageAction`: `add` *(və ya `replace`)*
 
 ---
 
@@ -117,4 +95,3 @@ Inventory API-lərində məhsul əlavə etmək, yeniləmək və silmək yalnız 
 * **Method**: `DELETE`
 * **URL**: `http://localhost:3000/api/inventory/673f1a2b3c4d5e6f7a8b9c0d`
 * **Auth**: `@Auth(UserRole.ADMIN)`
-* **İş Prinsipi**: Posteri bazadan silir və Cloudinary-də olan bütün şəkillərini də təmizləyir.
