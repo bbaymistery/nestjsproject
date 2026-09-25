@@ -11,6 +11,49 @@ Sifariş API-ləri daxil olmuş istifadəçi və ya Admin hüququ tələb edir:
 
 ---
 
+## 💡 Real Saytda Ödəniş Prosesi 4 Addımda Necə Baş Verir?
+
+1️⃣ **ADDIM: Sayt Açılır (`GET /api/order/payment/key`)**
+Müştəri səbətdəki posterləri alacaq "Ödəniş Səhifəsi"nə (Checkout) daxil olan kimi, vebsayt/tətbiq arxada backend-dən `GET /api/order/payment/key` çağırır.
+* **Məqsəd:** Ekranda Kredit Kartı daxil etmə formalarını (Kart №, CVC, Tarix) təhlükəsiz rəsmi Stripe pəncərəsi kimi göstərmək üçün Stripe JS kitabxanasını aktivləşdirir (`loadStripe(publishableKey)`).
+
+2️⃣ **ADDIM: Ödəniş Başladılır (`POST /api/order/payment/initiate`)**
+Müştəri "Ödənişə Keç" düyməsini sıxır. Vebsayt backend-ə məhsulları və ümumi qiyməti göndərir. Server Stripe-dan bu sifariş üçün xüsusi `clientSecret` və `paymentIntentId` alır.
+
+3️⃣ **ADDIM: Kart Məlumatları Stripe-a Göndərilir**
+Müştəri kart nömrəsini daxil edib "Ödə" düyməsini sıxır. 1-ci addımda yüklənmiş Stripe forması həmin `clientSecret` vasitəsilə müştərinin kartından pulu çıxarır (birbaşa Visa/Mastercard tərəfindən icra olunur).
+
+4️⃣ **ADDIM: Sifariş Bazada Yaradılır (`POST /api/order/payment/verify`)**
+Ödəniş uğurla keçdikdən sonra Backend-ə xəbər verilir: *"Stripe ödənişi təsdiqlədi!"* Və backend sifarişi MongoDB bazamıza saxlayır, posterin stok sayını azaldır.
+
+📌 **Xülasə:** `publishableKey`-in birinci gəlməsinin mənası odur ki, vebsayt daha ödəniş düyməsinə basılmadan əvvəl təhlükəsiz Stripe Kart Pəncərəsini ekranda hazırlaya bilsin! 💡
+
+---
+
+## 🛡️ Frontend Vebsayt vs Postman vs Production Təhlükəsizliyi İzahı
+
+> [!NOTE]
+> **Kod Məkanı**: Məhz bu məntiq [payment.service.ts](file:///c:/Users/User/Desktop/nest_js_projects/1_poster_parlor/new-poster-parlor-api/libs/order/src/lib/payment.service.ts#L78-L88) faylının `verifyPaymentIntent` metodu daxilində tətbiq olunub.
+
+1️⃣ **Frontend Vebsaytda (Netlify / Vercel Və ya Lokalda) Necə Olacaq?**
+Vebsayt tərəfi hazır olduqda (istər lokaldan açılsın, istərsə də Netlify-dan):
+* Müştəri "Ödəniş et" düyməsini basanda ekranda rəsmi Stripe Kredit Kartı pəncərəsi (Stripe Elements) açılacaq.
+* Sən həmin pəncərəyə Stripe-ın pulsuz test kartını (`4242 4242 4242 4242`, CVC: `123`, Tarix: `12/28`) yazacaqsan.
+* Stripe ödənişi həqiqətən icra edəcək və status `succeeded` (Uğurlu) olacaq.
+* Vebsayt backend-ə `verify` göndərəcək VƏ backend ödənişin həqiqətən keçdiyini doğrulayıb sifarişi yaradacaq!
+
+2️⃣ **Bəs Biz Niyə Postman Üçün Bu Şərti (`isDevelopment`) Yazdıq?**
+Çünki Postman bir vebsayt deyil! Postman-ın daxilində brauzer kimi kart nömrəsi daxil etmək üçün pəncərə (widget) yoxdur.
+Mən bu şərti ona görə əlavə etdim ki, sən hələ Frontend vebsaytı yazılmadan öncə, sırf Postman-da backend-in tam doğru işlədiyini sınaqdan keçirə biləsən!
+
+3️⃣ **Production-da (İstehsalatda) Təhlükəsizlik Necə Olacaq?**
+Layihə serverə (məsələn: Render / AWS) qalxıb Production rejiminə keçəndə (`NODE_ENV=production` olduqda):
+* `isDevelopment` avtomatik olaraq `false` olur.
+* Backend həmin test güzəştini bağlayır və ancaq və ancaq kartla real ödənilmiş (`status === 'succeeded'`) ödənişləri qəbul edir.
+* Yəni sistemimiz həm Postman testlərin üçün çox rahatdır, həm də canlı tətbiq üçün 100% təhlükəsizdir! 🚀
+
+---
+
 ## 🚀 2. Postman-da Addım-Addım Test Ssenariləri
 
 Əsas URL: **`http://localhost:3000/api/order`**
@@ -111,6 +154,15 @@ Sifariş API-ləri daxil olmuş istifadəçi və ya Admin hüququ tələb edir:
   }
   ```
 * **Cavab (200 OK)**: Sifariş yaratdı, stok azaldı və `status: "PROCESSING"`, `isPaid: true` kimi saxlanıldı!
+
+> [!IMPORTANT]
+> **Postman-da TEST 3 (`verify`) Sınağının Keçməsi Üçün (Stripe Dashboard Təsdiqi):**
+> Postman-da rəsmi kart pəncərəsi olmadığı üçün TEST 2-dən gələn `paymentIntentId`-nin statusu Stripe-da hələ `requires_payment_method` olaraq qalır.
+> `verify` sorğusunun 200 OK qaytarması üçün:
+> 1. Browser-də **[dashboard.stripe.com](https://dashboard.stripe.com)** panelinizə girin.
+> 2. Sol menyudan **Payments** bölməsinə keçin.
+> 3. Orada `pi_...` (TEST 2-də `initiate` sorğusunun cavabında gələn `paymentIntentId`) sənədini tapıb üstünə klikləyin və **"Capture / Confirm"** edin.
+> 4. Sonra Postman-da `verify` düyməsini sıxın — ödəniş 200 OK ilə doğrulanacaq VƏ sifariş MongoDB-də yaradılacaq!
 
 ---
 

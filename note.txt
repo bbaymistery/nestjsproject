@@ -1,1 +1,9 @@
-12.51
+
+
+
+2.Gele publish key ve s bunlar safety acisindan mence bir asa ele
+ gelmemelidir bunlar bize mmm token kimi gelmelidir ve biz o tokeni request gonderdigimizde mmm
+ o otomatik backendde onu normal publishe convert edib ele etmelidir
+
+
+ cunki men xatrlyram men ilk is yermde hemse token alrdk ve publish keyede mence o session token falan deyrdi
