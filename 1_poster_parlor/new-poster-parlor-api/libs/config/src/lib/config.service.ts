@@ -43,9 +43,7 @@ export class AppConfigService {
   get paymentConfig() {
     return {
       razorpayKeyId: this.configService.getOrThrow<string>('RAZORPAY_API_KEY'),
-      razorpayKeySecret: this.configService.getOrThrow<string>(
-        'RAZORPAY_API_SECRET'
-      ),
+      razorpayKeySecret: this.configService.getOrThrow<string>('RAZORPAY_API_SECRET'),
     };
   }
   get isDevelopment(): boolean {
