@@ -1,13 +1,13 @@
 /**
- * Pricing utilities for the frontend
+ * Pricing utilities for the frontend (USD / US States)
  * NOTE: These calculations must match the backend at:
  * api/libs/orders/src/lib/order.service.ts
  */
 
-import { INDIAN_STATES, REMOTE_STATES, PRICING_THRESHOLDS, type IndianState } from "@/lib/constants/pricing";
+import { US_STATES, REMOTE_STATES, PRICING_THRESHOLDS, type USState } from "@/lib/constants/pricing";
 
 // Re-export constants for backward compatibility
-export { INDIAN_STATES, REMOTE_STATES, type IndianState };
+export { US_STATES, REMOTE_STATES, type USState };
 
 // Destructure pricing thresholds for internal use
 const { BASE_SHIPPING, FREE_SHIPPING_THRESHOLD, REMOTE_STATE_CHARGE, GST_RATE } = PRICING_THRESHOLDS;
@@ -16,28 +16,27 @@ const { BASE_SHIPPING, FREE_SHIPPING_THRESHOLD, REMOTE_STATE_CHARGE, GST_RATE } 
  * Calculate shipping cost based on subtotal and delivery state
  * @param subtotal - Cart subtotal amount
  * @param state - Delivery state name
- * @returns Shipping cost in INR
+ * @returns Shipping cost in USD
  */
 export function calculateShipping(subtotal: number, state: string): number {
-  // Free shipping if subtotal >= ₹250, otherwise ₹50 flat fee
+  // Free shipping if subtotal >= $50, otherwise $5 flat fee
   const baseShipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : BASE_SHIPPING;
 
-  // Add state-based shipping (higher for remote areas)
+  // Add state-based shipping (higher for remote areas like Alaska & Hawaii)
   const isRemoteState = REMOTE_STATES.includes(state as (typeof REMOTE_STATES)[number]);
   const remoteCharge = isRemoteState ? REMOTE_STATE_CHARGE : 0;
 
-  // Formula: (0 or 50) + remote charge (150 for remote states)
   return baseShipping + remoteCharge;
 }
 
 /**
- * Calculate tax (GST) on subtotal
+ * Calculate tax on subtotal
  * @param subtotal - Cart subtotal amount
- * @returns Tax amount in INR
+ * @returns Tax amount in USD
  */
 export function calculateTax(subtotal: number): number {
-  // 18% GST for India
-  return Math.round(subtotal * GST_RATE);
+  // 8% Sales Tax
+  return Math.round(subtotal * GST_RATE * 100) / 100;
 }
 
 /**
@@ -77,5 +76,5 @@ export function getShippingMessage(subtotal: number): string {
   if (subtotal >= FREE_SHIPPING_THRESHOLD) return "🎉 You qualify for free shipping!";
 
   const amountNeeded = FREE_SHIPPING_THRESHOLD - subtotal;
-  return `Add ₹${amountNeeded} more for free shipping`;
+  return `Add $${amountNeeded.toFixed(2)} more for free shipping`;
 }

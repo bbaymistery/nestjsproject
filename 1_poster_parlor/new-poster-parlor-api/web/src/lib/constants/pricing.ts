@@ -1,64 +1,90 @@
 /**
- * 💰 PRICING & SHIPPING CONSTANTS
+ * 💰 PRICING & SHIPPING CONSTANTS (USA / USD)
  * 
- * Bu fayl tətbiqdə istifadə olunan çatdırılma haqqı, vergi dərəcəsi (GST) və regional 
- * çatdırılma məhdudiyyətləri üçün sabit (constant) qiymət parametrlərini saxlayır.
+ * Bu fayl tətbiqdə istifadə olunan çatdırılma haqqı, vergi dərəcəsi və regional 
+ * çatdırılma məhdudiyyətləri üçün sabit qiymət parametrlərini saxlayır.
  */
 
 /**
- * 📍 Qeydiyyat və Sifariş pəncərəsində çatdırılma ünvanı üçün ştatlar siyahısı
+ * 📍 Qeydiyyat və Sifariş pəncərəsində çatdırılma ünvanı üçün ABŞ ştatları siyahısı (US States)
  */
-export const INDIAN_STATES = [
-  "Andhra Pradesh",
-  "Arunachal Pradesh",
-  "Assam",
-  "Bihar",
-  "Chhattisgarh",
-  "Goa",
-  "Gujarat",
-  "Haryana",
-  "Himachal Pradesh",
-  "Jammu and Kashmir",
-  "Jharkhand",
-  "Karnataka",
-  "Kerala",
-  "Ladakh",
-  "Madhya Pradesh",
-  "Maharashtra",
-  "Manipur",
-  "Meghalaya",
-  "Mizoram",
-  "Nagaland",
-  "Odisha",
-  "Punjab",
-  "Rajasthan",
-  "Sikkim",
-  "Tamil Nadu",
-  "Telangana",
-  "Tripura",
-  "Uttar Pradesh",
-  "Uttarakhand",
-  "West Bengal",
-  "Delhi",
+export const US_STATES = [
+  "California",
+  "Texas",
+  "Florida",
+  "New York",
+  "Pennsylvania",
+  "Illinois",
+  "Ohio",
+  "Georgia",
+  "North Carolina",
+  "Michigan",
+  "New Jersey",
+  "Virginia",
+  "Washington",
+  "Arizona",
+  "Massachusetts",
+  "Tennessee",
+  "Indiana",
+  "Missouri",
+  "Maryland",
+  "Wisconsin",
+  "Colorado",
+  "Minnesota",
+  "South Carolina",
+  "Alabama",
+  "Louisiana",
+  "Kentucky",
+  "Oregon",
+  "Oklahoma",
+  "Connecticut",
+  "Utah",
+  "Nevada",
+  "Iowa",
+  "Arkansas",
+  "Mississippi",
+  "Kansas",
+  "New Mexico",
+  "Nebraska",
+  "Idaho",
+  "West Virginia",
+  "Hawaii",
+  "New Hampshire",
+  "Maine",
+  "Montana",
+  "Rhode Island",
+  "Delaware",
+  "South Dakota",
+  "North Dakota",
+  "Alaska",
+  "Vermont",
+  "Wyoming",
 ] as const;
 
-export type IndianState = (typeof INDIAN_STATES)[number];
+export type USState = (typeof US_STATES)[number];
+
+// Alias for backward compatibility if needed
+export const INDIAN_STATES = US_STATES;
+export type IndianState = USState;
 
 /**
- * 🏔️ Uzaq və ya çətin çatan bölgələr (Əlavə çatdırılma rüsumu tətbiq olunur)
+ * 🏔️ Uzaq və çətin çatan ABŞ ştatları (Əlavə çatdırılma rüsumu tətbiq olunur)
  */
-export const REMOTE_STATES = ["Jammu and Kashmir", "Arunachal Pradesh", "Ladakh",] as const;
+export const REMOTE_STATES = [
+  "Alaska",
+  "Hawaii",
+] as const;
 
 /**
- * 📊 Qiymətləndirmə və Vergi Parametrləri:
- * - FREE_SHIPPING_THRESHOLD: Pulsuz çatdırılma üçün minimum səbət məbləği (250)
- * - BASE_SHIPPING: Standart çatdırılma haqqı (50)
- * - REMOTE_STATE_CHARGE: Uzaq ştatlar üçün əlavə rüsum (150)
- * - GST_RATE: Vergi dərəcəsi (18% / 0.18)
+ * 📊 Qiymətləndirmə və Vergi Parametrləri (USD):
+ * - FREE_SHIPPING_THRESHOLD: Pulsuz çatdırılma üçün minimum səbət məbləği ($50)
+ * - BASE_SHIPPING: Standart çatdırılma haqqı ($5)
+ * - REMOTE_STATE_CHARGE: Uzaq ştatlar üçün əlavə rüsum ($15)
+ * - GST_RATE: Vergi dərəcəsi (%8 / 0.08)
  */
 export const PRICING_THRESHOLDS = {
-  FREE_SHIPPING_THRESHOLD: 250,
-  BASE_SHIPPING: 50,
-  REMOTE_STATE_CHARGE: 150,
-  GST_RATE: 0.18,
+  FREE_SHIPPING_THRESHOLD: 50,
+  BASE_SHIPPING: 5,
+  REMOTE_STATE_CHARGE: 15,
+  GST_RATE: 0.08,
 } as const;

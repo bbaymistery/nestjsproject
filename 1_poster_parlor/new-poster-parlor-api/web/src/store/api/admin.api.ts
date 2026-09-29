@@ -103,7 +103,14 @@ export const adminApi = createApi({
   baseQuery: baseQueryWithReauth,
   tagTypes: ["AdminStats", "AdminOrders", "AdminCustomers", "AdminProducts"],
   endpoints: (builder) => ({
-    D
+    // -------------------------------------------------------------
+    // 🔗 Backend: GET /api/admin/stats (AdminController -> getStats)
+    // Admin paneli statistikalarını (gəlir, sifariş sayları və cəmi müştərilər) gətirir
+    // -------------------------------------------------------------
+    getDashboardStats: builder.query<{ data: DashboardStats }, void>({
+      query: () => "/admin/stats",
+      providesTags: ["AdminStats"],
+    }),
     // -------------------------------------------------------------
     // 🔗 Backend: GET /api/admin/orders/recent (AdminController -> getRecentOrders)
     // Son daxil olan sifarişləri gətirir

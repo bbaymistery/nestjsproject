@@ -1,29 +1,29 @@
 /**
- * Formatting utilities for displaying dates, currency, and numbers
+ * Formatting utilities for displaying dates, currency, and numbers (US Locale & USD Currency)
  * Centralized to ensure consistency across the application
  */
 
 // ============ Currency Formatting ============
 
 /**
- * Format a number as Indian Rupees
- * @example formatPrice(1234.56) => "₹1,234.56"
+ * Format a number as US Dollars
+ * @example formatPrice(1234.56) => "$1,234.56"
  */
 export function formatPrice(amount: number): string {
-  return new Intl.NumberFormat("en-IN", {
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "INR",
-    minimumFractionDigits: 0,
+    currency: "USD",
+    minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
 }
 
 /**
- * Format a number with Indian locale (with commas)
- * @example formatNumber(123456) => "1,23,456"
+ * Format a number with US locale (with commas)
+ * @example formatNumber(123456) => "123,456"
  */
 export function formatNumber(num: number): string {
-  return num.toLocaleString("en-IN");
+  return num.toLocaleString("en-US");
 }
 
 /**
@@ -31,7 +31,7 @@ export function formatNumber(num: number): string {
  * @example formatCompactNumber(1500) => "1.5K"
  */
 export function formatCompactNumber(num: number): string {
-  return new Intl.NumberFormat("en-IN", {
+  return new Intl.NumberFormat("en-US", {
     notation: "compact",
     compactDisplay: "short",
   }).format(num);
@@ -41,27 +41,27 @@ export function formatCompactNumber(num: number): string {
 
 /**
  * Format a date string as a readable date
- * @example formatDate("2024-01-15T10:30:00Z") => "15 Jan 2024"
+ * @example formatDate("2024-01-15T10:30:00Z") => "Jan 15, 2024"
  */
 export function formatDate(dateString: string | Date): string {
   const date = typeof dateString === "string" ? new Date(dateString) : dateString;
-  return date.toLocaleDateString("en-IN", {
-    day: "numeric",
+  return date.toLocaleDateString("en-US", {
     month: "short",
+    day: "numeric",
     year: "numeric",
   });
 }
 
 /**
  * Format a date with time
- * @example formatDateTime("2024-01-15T10:30:00Z") => "15 Jan 2024, 10:30 AM"
+ * @example formatDateTime("2024-01-15T10:30:00Z") => "Jan 15, 2024, 10:30 AM"
  */
 export function formatDateTime(dateString: string | Date): string {
   const date =
     typeof dateString === "string" ? new Date(dateString) : dateString;
-  return date.toLocaleDateString("en-IN", {
-    day: "numeric",
+  return date.toLocaleDateString("en-US", {
     month: "short",
+    day: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
