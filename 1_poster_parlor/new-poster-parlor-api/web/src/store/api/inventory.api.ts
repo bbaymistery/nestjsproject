@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "./base.query";
-import { buildApiUrl } from "@/lib/helpers";
+import { buildApiUrl } from "@/lib/helper";
 
 export interface PosterImage {
   _id: string;
@@ -162,20 +162,17 @@ export const inventoryApi = createApi({
   baseQuery: baseQueryWithReauth,
   tagTypes: ["Inventory", "Filters"],
   endpoints: (builder) => ({
-    // Create inventory item
-    createInventoryItem: builder.mutation<
-      CreateInventoryResponse,
-      CreateInventoryItemParams
-    >({
+
+    // -------------------------------------------------------------
+    // 🔗 Backend: POST /api/inventory (InventoryController -> create)
+    // Yeni poster məhsulunu şəkli ilə birlikdə (FormData) yaradır
+    // -------------------------------------------------------------
+    createInventoryItem: builder.mutation<CreateInventoryResponse, CreateInventoryItemParams>({
       query: ({ images, itemDetails }) => {
         const formData = new FormData();
 
-        // Append images
-        images.forEach((image) => {
-          formData.append("images", image);
-        });
+        images.forEach((image) => { formData.append("images", image); });
 
-        // Append item details
         Object.entries(itemDetails).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
             if (Array.isArray(value)) {
@@ -186,24 +183,19 @@ export const inventoryApi = createApi({
           }
         });
 
-        return {
-          url: "/inventory",
-          method: "POST",
-          body: formData,
-        };
+        return { url: "/inventory", method: "POST", body: formData };
       },
       transformResponse: (response: CreateInventoryResponse) => response,
       transformErrorResponse: (error) => error,
       invalidatesTags: ["Inventory"],
     }),
 
-    // Get all inventory items
-    getAllInventory: builder.query<
-      GetAllInventoryResponse,
-      GetAllInventoryParams
-    >({
+    // -------------------------------------------------------------
+    // 🔗 Backend: GET /api/inventory (InventoryController -> findAll)
+    // Filter, axtarış və səhifələmə (pagination) ilə bütün posterləri gətirir
+    // -------------------------------------------------------------
+    getAllInventory: builder.query<GetAllInventoryResponse, GetAllInventoryParams>({
       query: ({ page = 1, limit = 10, filters = {} }) => {
-        // Handle tags array conversion
         const tagsValue = filters.tags
           ? Array.isArray(filters.tags)
             ? filters.tags.join(",")
@@ -233,16 +225,19 @@ export const inventoryApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.data.posters.map(({ _id }) => ({
-                type: "Inventory" as const,
-                id: _id,
-              })),
-              { type: "Inventory" as const, id: "LIST" },
-            ]
+            ...result.data.posters.map(({ _id }) => ({
+              type: "Inventory" as const,
+              id: _id,
+            })),
+            { type: "Inventory" as const, id: "LIST" },
+          ]
           : [{ type: "Inventory" as const, id: "LIST" }],
     }),
 
-    // Get inventory item by ID
+    // -------------------------------------------------------------
+    // 🔗 Backend: GET /api/inventory/:id (InventoryController -> findOne)
+    // Məhsulun ID-sinə görə posterin tam təfərrüatlarını gətirir
+    // -------------------------------------------------------------
     getInventoryItemById: builder.query<GetInventoryItemResponse, string>({
       query: (id) => `/inventory/${id}`,
       transformResponse: (response: GetInventoryItemResponse) => response,
@@ -250,31 +245,26 @@ export const inventoryApi = createApi({
       providesTags: (result, error, id) => [{ type: "Inventory", id }],
     }),
 
-    // Search inventory items
-    searchInventoryItems: builder.query<
-      SearchInventoryResponse,
-      SearchInventoryParams
-    >({
-      query: ({ query, limit = 20 }) =>
-        `/search?q=${encodeURIComponent(query)}&limit=${limit}`,
+    // -------------------------------------------------------------
+    // 🔗 Backend: GET /api/search (SearchController -> search)
+    // Axtarış sözünə görə məhsul soraqlayır
+    // -------------------------------------------------------------
+    searchInventoryItems: builder.query<SearchInventoryResponse, SearchInventoryParams>({
+      query: ({ query, limit = 20 }) => `/search?q=${encodeURIComponent(query)}&limit=${limit}`,
       transformResponse: (response: SearchInventoryResponse) => response,
       transformErrorResponse: (error) => error,
     }),
 
-    // Update inventory item
-    updateInventoryItem: builder.mutation<
-      UpdateInventoryResponse,
-      UpdateInventoryItemParams
-    >({
+    // -------------------------------------------------------------
+    // 🔗 Backend: PUT /api/inventory/:id (InventoryController -> update)
+    // Məhsul məlumatlarını və şəkillərini yeniləyir
+    // -------------------------------------------------------------
+    updateInventoryItem: builder.mutation<UpdateInventoryResponse, UpdateInventoryItemParams>({
       query: ({ id, images = [], updateDetails }) => {
         const formData = new FormData();
 
-        // Append new images
-        images.forEach((image) => {
-          formData.append("images", image);
-        });
+        images.forEach((image) => { formData.append("images", image); });
 
-        // Append update details
         Object.entries(updateDetails).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
             if (Array.isArray(value)) {
@@ -285,11 +275,7 @@ export const inventoryApi = createApi({
           }
         });
 
-        return {
-          url: `/inventory/${id}`,
-          method: "PUT",
-          body: formData,
-        };
+        return { url: `/inventory/${id}`, method: "PUT", body: formData };
       },
       transformResponse: (response: UpdateInventoryResponse) => response,
       transformErrorResponse: (error) => error,
@@ -299,12 +285,18 @@ export const inventoryApi = createApi({
       ],
     }),
 
-    // Get featured posters
+    // -------------------------------------------------------------
+    // 🔗 Backend: GET /api/inventory/featured (InventoryController -> getFeatured)
+    // Əsas səhifədə nümayiş etdirilən xüsusi (featured) posterləri gətirir
+    // -------------------------------------------------------------
     getFeaturedPosters: builder.query({
       query: () => `inventory/featured`,
     }),
 
-    // Get all filters/categories
+    // -------------------------------------------------------------
+    // 🔗 Backend: GET /api/inventory/categories/list (InventoryController -> getCategories)
+    // Bütün kateqoriyaları və filter seçimlərini gətirir
+    // -------------------------------------------------------------
     getAllFilters: builder.query<FiltersResponse, void>({
       query: () => "inventory/categories/list",
       transformResponse: (response: FiltersResponse) => response,
@@ -312,12 +304,12 @@ export const inventoryApi = createApi({
       providesTags: ["Filters"],
     }),
 
-    // Soft delete inventory item
+    // -------------------------------------------------------------
+    // 🔗 Backend: DELETE /api/inventory/:id (InventoryController -> softDelete)
+    // Məhsulu deaktiv edir (Soft Delete)
+    // -------------------------------------------------------------
     softDeleteInventoryItem: builder.mutation<DeleteInventoryResponse, string>({
-      query: (id) => ({
-        url: `/inventory/${id}`,
-        method: "DELETE",
-      }),
+      query: (id) => ({ url: `/inventory/${id}`, method: "DELETE", }),
       transformResponse: (response: DeleteInventoryResponse) => response,
       transformErrorResponse: (error) => error,
       invalidatesTags: (result, error, id) => [
@@ -326,7 +318,10 @@ export const inventoryApi = createApi({
       ],
     }),
 
-    // Hard delete inventory item
+    // -------------------------------------------------------------
+    // 🔗 Backend: DELETE /api/inventory/:id/hard (InventoryController -> hardDelete)
+    // Məhsulu bazadan tamamilə silir (Hard Delete)
+    // -------------------------------------------------------------
     deleteInventoryItem: builder.mutation<DeleteInventoryResponse, string>({
       query: (id) => ({
         url: `/inventory/${id}/hard`,

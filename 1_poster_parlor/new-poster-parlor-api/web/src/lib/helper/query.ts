@@ -11,16 +11,13 @@ type ParamValue = string | number | boolean | undefined | null;
  *
  * @example
  * buildQueryString({ page: 1, limit: 10, search: '' })
- * // Returns: "?page=1&limit=10"
+ * Returns: "?page=1&limit=10"
  *
  * @example
  * buildQueryString({ page: 1 }, '/api/orders')
- * // Returns: "/api/orders?page=1"
+ * Returns: "/api/orders?page=1"
  */
-export function buildQueryString(
-  params: Record<string, ParamValue>,
-  baseUrl: string = ""
-): string {
+export function buildQueryString(params: Record<string, ParamValue>, baseUrl: string = ""): string {
   const searchParams = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
@@ -31,9 +28,8 @@ export function buildQueryString(
 
   const queryString = searchParams.toString();
 
-  if (!queryString) {
-    return baseUrl;
-  }
+  if (!queryString) return baseUrl;
+
 
   return baseUrl ? `${baseUrl}?${queryString}` : `?${queryString}`;
 }
@@ -43,15 +39,9 @@ export function buildQueryString(
  *
  * @example
  * buildApiUrl('/admin/orders', { page: 1, status: 'PENDING' })
- * // Returns: "/admin/orders?page=1&status=PENDING"
+ * Returns: "/admin/orders?page=1&status=PENDING"
  */
-export function buildApiUrl(
-  endpoint: string,
-  params?: Record<string, ParamValue>
-): string {
-  if (!params) {
-    return endpoint;
-  }
-
+export function buildApiUrl(endpoint: string, params?: Record<string, ParamValue>): string {
+  if (!params) return endpoint;
   return buildQueryString(params, endpoint);
 }

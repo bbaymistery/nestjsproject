@@ -44,8 +44,7 @@ export function formatCompactNumber(num: number): string {
  * @example formatDate("2024-01-15T10:30:00Z") => "15 Jan 2024"
  */
 export function formatDate(dateString: string | Date): string {
-  const date =
-    typeof dateString === "string" ? new Date(dateString) : dateString;
+  const date = typeof dateString === "string" ? new Date(dateString) : dateString;
   return date.toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
@@ -74,8 +73,7 @@ export function formatDateTime(dateString: string | Date): string {
  * Format a date as relative time (e.g., "2 hours ago", "3 days ago")
  */
 export function formatRelativeTime(dateString: string | Date): string {
-  const date =
-    typeof dateString === "string" ? new Date(dateString) : dateString;
+  const date = typeof dateString === "string" ? new Date(dateString) : dateString;
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
@@ -95,8 +93,7 @@ export function formatRelativeTime(dateString: string | Date): string {
  * Format a date for inputs (YYYY-MM-DD)
  */
 export function formatDateForInput(dateString: string | Date): string {
-  const date =
-    typeof dateString === "string" ? new Date(dateString) : dateString;
+  const date = typeof dateString === "string" ? new Date(dateString) : dateString;
   return date.toISOString().split("T")[0];
 }
 

@@ -1,11 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit";
-
 import { AuthInitialState } from "@/types/api-response.type";
 import { authApi } from "../api/auth.api";
 
+/**
+ * 🔑 AUTHENTICATION SLICE (Redux State)
+ * 
+ * Bu slice istifadəçinin lokal brauzer seansını (user profili, giriş statusu və token istinadını) 
+ * Redux yaddaşında saxlayır və idarə edir.
+ */
+
 const initialState: AuthInitialState = {
   user: null,
-  accessToken: null, // ⚠️ Consider removing this since cookies handle it
+  accessToken: null, // 💡 Əsas təhlükəsizlik cookie-lərdə saxlanılır, bu sadəcə referans üçündür
   isAuthenticated: false,
 };
 
@@ -13,62 +19,66 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    /**
+     * 🟢 İdentifikasiya Məlumatlarını Təyin Et (Manual Dispatch)
+     */
     setCredentials: (state, action) => {
       state.user = action.payload.user;
       state.accessToken = action.payload.accessToken;
       state.isAuthenticated = true;
     },
+
+    /**
+     * 🔴 Sessiyanı Tamamən Sıfırla (Logout zamanı və ya 401 Re-auth uğursuz olduqda)
+     */
     clearAuth: (state) => {
       state.user = null;
       state.accessToken = null;
       state.isAuthenticated = false;
     },
   },
+  /**
+   * ⚡ EXTRA REDUCERS (RTK Query API Sorğularının Nəticələrinə Avtomatik Reaksiya)
+   * `extraReducers` vasitəsilə `authApi`-də baş verən uğurlu/uğursuz sorğulara uyğun olaraq 
+   * Redux auth state-ini avtomatik yeniləyirik.
+   */
   extraReducers: (builder) => {
-    // ✅ Handle successful login
-    builder.addMatcher(
-      authApi.endpoints.loginWithGoogle.matchFulfilled,
-      (state, action) => {
-        const userData = action.payload.data;
-        state.user = userData.user;
-        state.accessToken = userData.accessToken; // Store for reference only
-        state.isAuthenticated = true;
-      }
+
+    // ✅ 1. Uğurlu Google Login olduqda istifadəçi məlumatlarını və statusu yenilə
+    builder.addMatcher(authApi.endpoints.loginWithGoogle.matchFulfilled, (state, action) => {
+      const userData = action.payload.data;
+      state.user = userData.user;
+      state.accessToken = userData.accessToken;
+      state.isAuthenticated = true;
+    }
     );
 
-    // ✅ Handle logout - also triggered from baseQueryWithReauth
+    // ✅ 2. Uğurlu Logout olduqda Redux auth state-ini sıfırla
     builder.addMatcher(authApi.endpoints.logout.matchFulfilled, (state) => {
       state.user = null;
       state.accessToken = null;
       state.isAuthenticated = false;
     });
 
-    // ✅ Handle token refresh
-    builder.addMatcher(
-      authApi.endpoints.refreshToken.matchFulfilled,
-      (state, action) => {
-        // Update access token reference (cookie is already set by backend)
-        state.accessToken = action.payload.data.accessToken;
-      }
+    // ✅ 3. Access Token avtomatik refresh olunduqda token referansını yenilə
+    builder.addMatcher(authApi.endpoints.refreshToken.matchFulfilled, (state, action) => {
+      state.accessToken = action.payload.data.accessToken;
+    }
     );
 
-    // ✅ Handle successful user fetch
-    builder.addMatcher(
-      authApi.endpoints.getCurrentUser.matchFulfilled,
-      (state, action) => {
-        state.user = action.payload.data;
-        state.isAuthenticated = true;
-      }
+    // ✅ 4. `/auth/google/me` istifadəçi məlumatlarını uğurla gətirdikdə state-i doldur
+    builder.addMatcher(authApi.endpoints.getCurrentUser.matchFulfilled, (state, action) => {
+      state.user = action.payload.data;
+      state.isAuthenticated = true;
+    }
     );
 
-    // ✅ Handle failed /me request
-    builder.addMatcher(
-      authApi.endpoints.getCurrentUser.matchRejected,
-      (state) => {
-        state.user = null;
-        state.accessToken = null;
-        state.isAuthenticated = false;
-      }
+    // ✅ 5. Əgər `/auth/google/me` sorğusu rədd edilərsə (401/403) auth state-i təmizlə
+    builder.addMatcher(authApi.endpoints.getCurrentUser.matchRejected, (state) => {
+      state.user = null;
+      state.accessToken = null;
+      state.isAuthenticated = false;
+    }
     );
   },
 });

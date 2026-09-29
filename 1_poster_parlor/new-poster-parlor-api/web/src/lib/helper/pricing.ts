@@ -4,23 +4,13 @@
  * api/libs/orders/src/lib/order.service.ts
  */
 
-import {
-  INDIAN_STATES,
-  REMOTE_STATES,
-  PRICING_THRESHOLDS,
-  type IndianState,
-} from "@/lib/constants/pricing";
+import { INDIAN_STATES, REMOTE_STATES, PRICING_THRESHOLDS, type IndianState } from "@/lib/constants/pricing";
 
 // Re-export constants for backward compatibility
 export { INDIAN_STATES, REMOTE_STATES, type IndianState };
 
 // Destructure pricing thresholds for internal use
-const {
-  BASE_SHIPPING,
-  FREE_SHIPPING_THRESHOLD,
-  REMOTE_STATE_CHARGE,
-  GST_RATE,
-} = PRICING_THRESHOLDS;
+const { BASE_SHIPPING, FREE_SHIPPING_THRESHOLD, REMOTE_STATE_CHARGE, GST_RATE } = PRICING_THRESHOLDS;
 
 /**
  * Calculate shipping cost based on subtotal and delivery state
@@ -33,9 +23,7 @@ export function calculateShipping(subtotal: number, state: string): number {
   const baseShipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : BASE_SHIPPING;
 
   // Add state-based shipping (higher for remote areas)
-  const isRemoteState = REMOTE_STATES.includes(
-    state as (typeof REMOTE_STATES)[number]
-  );
+  const isRemoteState = REMOTE_STATES.includes(state as (typeof REMOTE_STATES)[number]);
   const remoteCharge = isRemoteState ? REMOTE_STATE_CHARGE : 0;
 
   // Formula: (0 or 50) + remote charge (150 for remote states)
@@ -58,10 +46,7 @@ export function calculateTax(subtotal: number): number {
  * @param state - Delivery state name
  * @returns Object with all pricing breakdown
  */
-export function calculateOrderTotal(
-  subtotal: number,
-  state: string
-): {
+export function calculateOrderTotal(subtotal: number, state: string): {
   subtotal: number;
   shippingCost: number;
   taxAmount: number;
@@ -79,9 +64,7 @@ export function calculateOrderTotal(
     taxAmount,
     totalPrice,
     freeShippingEligible: subtotal >= FREE_SHIPPING_THRESHOLD,
-    isRemoteState: REMOTE_STATES.includes(
-      state as (typeof REMOTE_STATES)[number]
-    ),
+    isRemoteState: REMOTE_STATES.includes(state as (typeof REMOTE_STATES)[number]),
   };
 }
 
@@ -91,9 +74,8 @@ export function calculateOrderTotal(
  * @returns Message about shipping status
  */
 export function getShippingMessage(subtotal: number): string {
-  if (subtotal >= FREE_SHIPPING_THRESHOLD) {
-    return "🎉 You qualify for free shipping!";
-  }
+  if (subtotal >= FREE_SHIPPING_THRESHOLD) return "🎉 You qualify for free shipping!";
+
   const amountNeeded = FREE_SHIPPING_THRESHOLD - subtotal;
   return `Add ₹${amountNeeded} more for free shipping`;
 }

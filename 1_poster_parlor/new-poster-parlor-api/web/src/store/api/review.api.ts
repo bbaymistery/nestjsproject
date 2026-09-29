@@ -74,18 +74,13 @@ export const reviewApi = createApi({
   baseQuery: baseQueryWithReauth,
   tagTypes: ["Reviews"],
   endpoints: (builder) => ({
-    getProductReviews: builder.query<
-      GetProductReviewsResponse,
-      GetProductReviewsParams
-    >({
-      query: ({
-        posterId,
-        page = 1,
-        limit = 10,
-        sort = "newest",
-        rating,
-        hasImage,
-      }) => {
+
+    // -------------------------------------------------------------
+    // 🔗 Backend: GET /api/review/:posterId (ReviewController -> getPosterReviews)
+    // Postere yazılmış rəyləri gətirir
+    // -------------------------------------------------------------
+    getProductReviews: builder.query<GetProductReviewsResponse, GetProductReviewsParams>({
+      query: ({ posterId, page = 1, limit = 10, sort = "newest", rating, hasImage, }) => {
         const params = new URLSearchParams();
         params.append("page", page.toString());
         params.append("limit", limit.toString());
@@ -93,16 +88,17 @@ export const reviewApi = createApi({
         if (rating) params.append("rating", rating.toString());
         if (hasImage) params.append("hasImage", "true");
 
-        return {
-          url: `/review/${posterId}?${params.toString()}`,
-          method: "GET",
-        };
+        return { url: `/review/${posterId}?${params.toString()}`, method: "GET", };
       },
       providesTags: (_result, _error, { posterId }) => [
         { type: "Reviews", id: posterId },
       ],
     }),
 
+    // -------------------------------------------------------------
+    // 🔗 Backend: POST /api/review/:posterId (ReviewController -> createReview)
+    // Postere yeni qiymətləndirmə/rəy (və istəyə bağlı şəkillər) əlavə edir
+    // -------------------------------------------------------------
     createReview: builder.mutation<Review, CreateReviewParams>({
       query: ({ posterId, rating, comment, images }) => {
         const formData = new FormData();

@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "./base.query";
-import { buildApiUrl } from "@/lib/helpers";
+import { buildApiUrl } from "@/lib/helper";
 
 // Poster image interface
 export interface PosterImage {
@@ -21,7 +21,7 @@ export interface PopulatedPoster {
   category: string;
 }
 
-// Types matching the backend DTOs
+// Types matching the NestJS backend DTOs
 export interface OrderItemDto {
   posterId: string | PopulatedPoster; // Can be string or populated poster
   quantity: number;
@@ -36,9 +36,10 @@ export interface ShippingAddressDto {
 }
 
 export interface PaymentDetailsDto {
-  method: "ONLINE" | "COD";
+  method: "STRIPE" | "COD";
   amount: number;
-  currency: "INR";
+  currency: "INR" | "USD";
+  paymentIntentId?: string;
 }
 
 export interface CustomerInfoDto {
@@ -62,12 +63,7 @@ export interface CreateOrderDto {
   notes?: string;
 }
 
-export type OrderStatus =
-  | "PENDING"
-  | "PROCESSING"
-  | "SHIPPED"
-  | "DELIVERED"
-  | "CANCELLED";
+export type OrderStatus = | "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
 
 export interface OrderResponse {
   _id: string;
@@ -105,8 +101,11 @@ export interface GetOrdersParams {
   limit?: number;
 }
 
-// Payment Types
-export interface InitiatePaymentDto {
+// ==========================================
+// 💳 STRIPE PAYMENT DTOs (NestJS Backend Integration)
+// ==========================================
+
+export interface InitiateStripePaymentDto {
   items: { posterId: string; quantity: number; price: number }[];
   shippingAddress: ShippingAddressDto;
   shippingCost: number;
@@ -114,24 +113,16 @@ export interface InitiatePaymentDto {
   totalPrice: number;
 }
 
-export interface InitiatePaymentResponse {
-  orderId: string;
+export interface InitiateStripePaymentResponse {
+  clientSecret: string;
+  paymentIntentId: string;
   amount: number;
   currency: string;
-  keyId: string;
 }
 
-export interface VerifyPaymentDto {
-  razorpay_order_id: string;
-  razorpay_payment_id: string;
-  razorpay_signature: string;
-  customer?: CustomerInfoDto;
-  items: { posterId: string; quantity: number; price: number }[];
-  shippingAddress: ShippingAddressDto;
-  shippingCost: number;
-  taxAmount: number;
-  totalPrice: number;
-  notes?: string;
+export interface VerifyStripePaymentDto {
+  paymentIntentId: string;
+  orderId?: string;
 }
 
 export const orderApi = createApi({
@@ -139,53 +130,54 @@ export const orderApi = createApi({
   baseQuery: baseQueryWithReauth,
   tagTypes: ["Order"],
   endpoints: (builder) => ({
-    // Payment endpoints
-    getPaymentKey: builder.query<{ data: { keyId: string } }, void>({
+
+    // -------------------------------------------------------------
+    // 🔗 Backend: GET /api/order/payment/key (OrderController -> getPaymentKey)
+    // Stripe Publishable Key-i götürür
+    // -------------------------------------------------------------
+    getPaymentKey: builder.query<{ data: { publishableKey: string } }, void>({
       query: () => "/order/payment/key",
     }),
 
-    initiatePayment: builder.mutation<
-      { data: InitiatePaymentResponse },
-      InitiatePaymentDto
-    >({
-      query: (paymentData) => ({
-        url: "/order/payment/initiate",
-        method: "POST",
-        body: paymentData,
-      }),
+    // -------------------------------------------------------------
+    // 🔗 Backend: POST /api/order/payment/initiate (OrderController -> initiatePayment)
+    // Stripe PaymentIntent yaradır və clientSecret qaytarır
+    // -------------------------------------------------------------
+    initiatePayment: builder.mutation<{ data: InitiateStripePaymentResponse }, InitiateStripePaymentDto>({
+      query: (paymentData) => ({ url: "/order/payment/initiate", method: "POST", body: paymentData, }),
     }),
 
-    verifyPayment: builder.mutation<{ data: OrderResponse }, VerifyPaymentDto>({
-      query: (verifyData) => ({
-        url: "/order/payment/verify",
-        method: "POST",
-        body: verifyData,
-      }),
+    // -------------------------------------------------------------
+    // 🔗 Backend: POST /api/order/payment/verify (OrderController -> verifyPayment)
+    // Stripe tərəfindən ödənişin statusunu (succeeded) yoxlayır və DB-də sifarişi yaradır
+    // -------------------------------------------------------------
+    verifyPayment: builder.mutation<{ data: OrderResponse }, VerifyStripePaymentDto>({
+      query: (verifyData) => ({ url: "/order/payment/verify", method: "POST", body: verifyData, }),
       invalidatesTags: ["Order"],
     }),
 
-    // Order endpoints
+    // -------------------------------------------------------------
+    // 🔗 Backend: POST /api/order (OrderController -> createOrder)
+    // Birbaşa COD (Cash on Delivery) və ya manual sifariş yaradır
+    // -------------------------------------------------------------
     createOrder: builder.mutation<{ data: OrderResponse }, CreateOrderDto>({
-      query: (orderData) => ({
-        url: "/order",
-        method: "POST",
-        body: orderData,
-      }),
+      query: (orderData) => ({ url: "/order", method: "POST", body: orderData, }),
       invalidatesTags: ["Order"],
     }),
 
-    getMyOrders: builder.query<
-      { data: PaginatedOrdersResponse },
-      GetOrdersParams | void
-    >({
-      query: (params) =>
-        buildApiUrl("/order", {
-          page: params?.page,
-          limit: params?.limit,
-        }),
+    // -------------------------------------------------------------
+    // 🔗 Backend: GET /api/order (OrderController -> getMyOrders)
+    // Giriş etmiş istifadəçinin bütün sifarişlərini gətirir
+    // -------------------------------------------------------------
+    getMyOrders: builder.query<{ data: PaginatedOrdersResponse }, GetOrdersParams | void>({
+      query: (params) => buildApiUrl("/order", { page: params?.page, limit: params?.limit, }),
       providesTags: ["Order"],
     }),
 
+    // -------------------------------------------------------------
+    // 🔗 Backend: GET /api/order/:id (OrderController -> getOrderById)
+    // ID-yə görə tək sifarişin təfərrüatlarını gətirir
+    // -------------------------------------------------------------
     getOrderById: builder.query<{ data: OrderResponse }, string>({
       query: (orderId) => `/order/${orderId}`,
       providesTags: (result, error, id) => [{ type: "Order", id }],

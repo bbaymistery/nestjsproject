@@ -2,6 +2,13 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../index";
 import { toast } from "sonner";
 
+/**
+ * 🛒 CART SLICE (Redux State & LocalStorage Persistence)
+ * 
+ * Bu slice müştərinin səbətini (Cart) idarə edir. Səbətdəki məhsullar brauzerin `localStorage`-ında 
+ * saxlanılır ki, səhifə yenilənəndə (refresh) səbətdəki mallar silinməsin.
+ */
+
 export interface CartItem {
   _id: string;
   title: string;
@@ -26,6 +33,9 @@ const initialState: CartState = {
   subtotal: 0,
 };
 
+/**
+ * 💾 LocalStorage-dən səbət məlumatlarını yükləyən funksiya (SSR uyğunluğu ilə)
+ */
 const loadCartFromStorage = (): CartState => {
   if (typeof window === "undefined") return initialState;
 
@@ -40,7 +50,9 @@ const loadCartFromStorage = (): CartState => {
   return initialState;
 };
 
-// Save cart to localStorage
+/**
+ * 💾 Səbət dəyişdikdə `localStorage`-ə yazan funksiya
+ */
 const saveCartToStorage = (state: CartState) => {
   if (typeof window === "undefined") return;
 
@@ -51,6 +63,9 @@ const saveCartToStorage = (state: CartState) => {
   }
 };
 
+/**
+ * 🧮 Səbətdəki ümumi məhsul sayını və Yekun Məbləği (Subtotal) hesablayan funksiya
+ */
 const calculateTotals = (items: CartItem[]) => {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce(
@@ -64,13 +79,18 @@ const cartSlice = createSlice({
   name: "cart",
   initialState: loadCartFromStorage(),
   reducers: {
+    /**
+     * 🟢 Səbətə Məhsul Əlavə Et
+     * - Əgər məhsul artıq səbətdə varsa, sayını artırır (Stok limitini keçməmək şərtilə).
+     * - Əgər yoxdursa, yeni element kimi səbətə əlavə edir.
+     */
     addToCart: (state, action: PayloadAction<CartItem>) => {
       const existingItem = state.items.find(
         (item) => item.posterId === action.payload.posterId
       );
 
       if (existingItem) {
-        // Check if adding more would exceed stock
+        // Stok limitini yoxlayırıq
         if (
           existingItem.quantity + action.payload.quantity >
           existingItem.stock
@@ -89,6 +109,9 @@ const cartSlice = createSlice({
       saveCartToStorage(state);
     },
 
+    /**
+     * 🔴 Məhsulu Səbətdən Sil
+     */
     removeFromCart: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter(
         (item) => item.posterId !== action.payload
@@ -99,6 +122,9 @@ const cartSlice = createSlice({
       saveCartToStorage(state);
     },
 
+    /**
+     * ✏️ Məhsulun Sayını Birbaşa Yenilə (Daxil edilən kəmiyyətə əsasən)
+     */
     updateQuantity: (
       state,
       action: PayloadAction<{ posterId: string; quantity: number }>
@@ -107,7 +133,7 @@ const cartSlice = createSlice({
         (item) => item.posterId === action.payload.posterId
       );
       if (item) {
-        // Ensure quantity doesn't exceed stock
+        // Sayın minimum 1, maksimum stok sayı qədər olmasını təmin edir
         item.quantity = Math.min(
           Math.max(1, action.payload.quantity),
           item.stock
@@ -119,6 +145,9 @@ const cartSlice = createSlice({
       }
     },
 
+    /**
+     * ➕ Məhsul Sayını 1 Vahid Artır
+     */
     incrementQuantity: (state, action: PayloadAction<string>) => {
       const item = state.items.find((item) => item.posterId === action.payload);
       if (item && item.quantity < item.stock) {
@@ -130,6 +159,9 @@ const cartSlice = createSlice({
       }
     },
 
+    /**
+     * ➖ Məhsul Sayını 1 Vahid Azalt
+     */
     decrementQuantity: (state, action: PayloadAction<string>) => {
       const item = state.items.find((item) => item.posterId === action.payload);
       if (item && item.quantity > 1) {
@@ -141,6 +173,9 @@ const cartSlice = createSlice({
       }
     },
 
+    /**
+     * 🧹 Səbəti Tamamən Təmizlə (Sifariş bitdikdə və ya düyməyə basıldıqda)
+     */
     clearCart: (state) => {
       state.items = [];
       state.totalItems = 0;
@@ -159,7 +194,7 @@ export const {
   clearCart,
 } = cartSlice.actions;
 
-// Selectors
+// 🔍 REDUX SELECTORLARI (Komponentlərdə istifadə etmək üçün)
 export const selectCartItems = (state: RootState) => state.cart.items;
 export const selectCartTotalItems = (state: RootState) => state.cart.totalItems;
 export const selectCartSubtotal = (state: RootState) => state.cart.subtotal;
