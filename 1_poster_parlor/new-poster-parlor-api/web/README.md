@@ -24,14 +24,14 @@ Welcome to the **Next.js 16 (App Router)** Frontend client for **Poster Parlor**
 
 ---
 
-### 🔵 STEP 2: Authentication & Session Management (NEXT STEP)
-- [ ] **Google OAuth Button & Login Modal/Page**: Integration with `@react-oauth/google`.
-- [ ] **User Header Badge**: Shows user name, avatar, role (`USER` / `ADMIN`), and Logout action.
-- [ ] **Auth State Sync**: Connect with `auth.api.ts` (`loginWithGoogle`, `logout`, `getCurrentUser`) and `auth.slice.ts`.
+### 🟢 STEP 2: Authentication & Session Management (COMPLETED)
+- [x] **Google OAuth Button & Login Modal**: Integration with `@react-oauth/google` and fallback demo login.
+- [x] **User Header Badge (`UserNav`)**: Shows user avatar, name, email, role (`USER` / `ADMIN`), and Sign Out action.
+- [x] **Auth State Sync**: Connect with `auth.api.ts` (`loginWithGoogle`, `logout`, `getCurrentUser`), `auth.slice.ts`, and `AuthInitializer`.
 
 ---
 
-### 🟡 STEP 3: Poster Catalog & Product Showcase
+### 🔵 STEP 3: Poster Catalog & Product Showcase (NEXT STEP)
 - [ ] **Catalog Page (`/posters`)**: Grid of poster cards with images, titles, and prices.
 - [ ] **Filtering & Search**: Category selector, price slider, search input, and pagination.
 - [ ] **Poster Detail Page (`/posters/:id`)**: Gallery carousel, material specifications, dimensions, and stock indicators.

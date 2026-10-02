@@ -9,7 +9,9 @@ import {
  * 🌐 BACKEND API BASE URL
  * `.env` faylından `NEXT_PUBLIC_API_URL` dəyərini alır (məsələn: `http://localhost:5000/api`)
  */
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+
 
 /**
  * 🛰️ STANDART BASE QUERY (fetchBaseQuery)

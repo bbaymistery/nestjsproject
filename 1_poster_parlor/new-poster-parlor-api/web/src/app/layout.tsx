@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/header/header";
 import { Footer } from "@/components/layout/footer/footer";
 import { Toaster } from "sonner";
+import { AppProvider } from "@/providers/app-provider";
 
 const robotoMono = Roboto_Mono({
   variable: "--font-mono",
@@ -25,11 +26,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className={`${robotoMono.variable} antialiased bg-background text-foreground min-h-screen flex flex-col`}>
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <Toaster position="bottom-right" />
+        <AppProvider>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <Toaster position="bottom-right" />
+        </AppProvider>
       </body>
     </html>
   );
 }
+

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Code2, ShoppingBag, Sparkles, Compass } from "lucide-react";
+import { Code2, ShoppingBag, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { UserNav } from "@/features/auth/components";
 
 export function Header() {
   const pathname = usePathname();
@@ -82,8 +83,12 @@ export function Header() {
               0
             </span>
           </Link>
+
+          {/* User Auth Navigation */}
+          <UserNav />
         </div>
       </div>
     </header>
   );
 }
+
