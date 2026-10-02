@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Sparkles, Code2, Heart, Github } from "lucide-react";
+import { Sparkles, Code2, Github } from "lucide-react";
 
 export function Footer() {
   return (
@@ -33,7 +33,7 @@ export function Footer() {
         {/* Copyright */}
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <span>Created </span>
-          <Heart className="h-3 w-3 text-red-500 fill-red-500 inline" />
+          <Github className="h-3 w-3 text-red-500 fill-red-500 inline" />
           <span>
             <a href="https://github.com/bbaymistery" target="_blank" rel="noopener noreferrer" className="text-amber-500 font-semibold hover:text-amber-400 transition-colors flex items-center gap-1">
               by Elgun Ezmemmedov

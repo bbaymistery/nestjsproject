@@ -8,3 +8,7 @@ export * from "./stripe.type";
 
 // Component Types
 export * from "./components.type";
+
+// API Documentation Types
+export * from "./api-docs.type";
+
