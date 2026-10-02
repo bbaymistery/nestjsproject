@@ -14,8 +14,8 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Poster Parlor | Premium Poster Store",
-  description: "Full-Stack NestJS & Next.js Poster Store Application",
+  title: "ArtisanFrame | Premium Fine Art & Poster Store",
+  description: "Full-Stack NestJS & Next.js Premium Art & Poster Application",
 };
 
 export default function RootLayout({

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAppSelector } from "@/store";
 import { useLogoutMutation } from "@/store/api/auth.api";
@@ -24,9 +24,14 @@ import {
 import { toast } from "sonner";
 
 export function UserNav() {
+  const [mounted, setMounted] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -36,6 +41,12 @@ export function UserNav() {
       toast.error("Logout failed. Please try again.");
     }
   };
+
+  if (!mounted) {
+    return (
+      <div className="h-9 w-20 rounded-full bg-secondary/30 animate-pulse" />
+    );
+  }
 
   if (!isAuthenticated || !user) {
     return (
@@ -99,7 +110,7 @@ export function UserNav() {
 
         {/* Navigation Items */}
         <DropdownMenuItem asChild>
-          <Link href="/myorder" className="flex items-center gap-2">
+          <Link href="/myorders" className="flex items-center gap-2">
             <ShoppingBag className="h-4 w-4 text-amber-500" />
             <span>My Orders</span>
           </Link>

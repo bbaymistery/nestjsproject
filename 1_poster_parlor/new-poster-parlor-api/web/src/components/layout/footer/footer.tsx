@@ -12,7 +12,7 @@ export function Footer() {
             <Sparkles className="h-4 w-4 text-white" />
           </div>
           <span className="text-sm font-bold tracking-tight">
-            PosterParlor <span className="text-muted-foreground font-normal">| NestJS + Next.js Fullstack</span>
+            ArtisanFrame <span className="text-muted-foreground font-normal">| NestJS + Next.js Fullstack</span>
           </span>
         </div>
 

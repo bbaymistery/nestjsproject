@@ -122,7 +122,15 @@ export interface InitiateStripePaymentResponse {
 
 export interface VerifyStripePaymentDto {
   paymentIntentId: string;
-  orderId?: string;
+  customer?: CustomerInfoDto;
+  items: { posterId: string; quantity: number; price: number }[];
+  shippingAddress: ShippingAddressDto;
+  shippingCost: number;
+  taxAmount: number;
+  totalPrice: number;
+  currency?: string;
+  notes?: string;
+  sandbox?: boolean;
 }
 
 export const orderApi = createApi({

@@ -24,7 +24,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             <Sparkles className="h-6 w-6 text-white" />
           </div>
           <DialogTitle className="text-xl font-black tracking-tight">
-            Welcome to Poster Parlor
+            Welcome to ArtisanFrame
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground max-w-xs">
             Sign in using Google OAuth 2.0. NestJS will issue 2 HttpOnly cookies (<code className="text-amber-400">access_token</code> & <code className="text-amber-400">refresh_token</code>) for silent authentication.

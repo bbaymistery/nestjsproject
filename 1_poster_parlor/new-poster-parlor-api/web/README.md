@@ -1,6 +1,6 @@
-# 🚀 Poster Parlor — Frontend Step-by-Step Development Roadmap
+# 🚀 ArtisanFrame — Frontend Step-by-Step Development Roadmap
 
-Welcome to the **Next.js 16 (App Router)** Frontend client for **Poster Parlor**! This document defines the exact step-by-step development roadmap for building our full-stack application step by step.
+Welcome to the **Next.js 16 (App Router)** Frontend client for **ArtisanFrame**! This document defines the exact step-by-step development roadmap for building our full-stack application step by step.
 
 ---
 
@@ -31,33 +31,33 @@ Welcome to the **Next.js 16 (App Router)** Frontend client for **Poster Parlor**
 
 ---
 
-### 🔵 STEP 3: Poster Catalog & Product Showcase (NEXT STEP)
-- [ ] **Catalog Page (`/posters`)**: Grid of poster cards with images, titles, and prices.
-- [ ] **Filtering & Search**: Category selector, price slider, search input, and pagination.
-- [ ] **Poster Detail Page (`/posters/:id`)**: Gallery carousel, material specifications, dimensions, and stock indicators.
-- [ ] **RTK Query Integration**: Connect with `inventory.api.ts` (`getAllInventory`, `getInventoryItemById`).
+### 🟢 STEP 3: Poster Catalog & Product Showcase (COMPLETED)
+- [x] **Catalog Page (`/posters`)**: Grid of poster cards with images, titles, dimensions, and prices.
+- [x] **Filtering & Search**: Category selector tabs, search input, price/date/title sorting, and pagination.
+- [x] **Poster Detail Page (`/posters/:id`)**: Image gallery viewer, specifications, stock indicator, quantity selector, and Add to Cart.
+- [x] **RTK Query Integration**: Connected with `inventory.api.ts` (`getAllInventory`, `getInventoryItemById`, `getFeaturedPosters`, `getAllFilters`).
 
 ---
 
-### 🟠 STEP 4: Shopping Cart & Local Persistence
-- [ ] **Cart Drawer / Page (`/cart`)**: Item list, quantity increment/decrement, and item removal.
-- [ ] **Price Summary**: Subtotal, shipping cost calculator, and tax calculation (`calculateOrderTotal`).
-- [ ] **State Persistence**: Connect with `cart.slice.ts` and `localStorage`.
+### 🟢 STEP 4: Shopping Cart & Local Persistence (COMPLETED)
+- [x] **Cart Drawer & Dedicated Page (`/cart`)**: Item list, quantity increment/decrement, clear cart, and item removal.
+- [x] **Price Summary**: Subtotal, shipping cost calculator, and free shipping progress bar (`CartSummary`).
+- [x] **State Persistence**: Connected with `cart.slice.ts` and `localStorage`.
 
 ---
 
-### 🟣 STEP 5: Checkout & Stripe Payment Integration
-- [ ] **Checkout Form (`/checkout`)**: Shipping address inputs (US States dropdown).
-- [ ] **Stripe Elements Widget**: Integrated Stripe card input using `publishableKey`.
-- [ ] **Payment Workflow**:
-  1. Call `POST /api/order/payment/initiate` to get `clientSecret`.
+### 🟢 STEP 5: Checkout & Stripe Payment Integration (COMPLETED)
+- [x] **Checkout Form (`/checkout`)**: Shipping address inputs (US States dropdown), contact info, and payment mode toggle (`STRIPE` vs `COD`).
+- [x] **Stripe Elements Integration**: Connected with `@stripe/stripe-js` & `@stripe/react-stripe-js` using backend API publishable key.
+- [x] **Payment Workflow**:
+  1. Call `POST /api/order/payment/initiate` to get `clientSecret` and `paymentIntentId`.
   2. Confirm payment via Stripe SDK.
-  3. Call `POST /api/order/payment/verify` to confirm order creation.
-- [ ] **Order History Page (`/myorder`)**: List user's past purchases and status.
+  3. Call `POST /api/order/payment/verify` to confirm order creation in NestJS database.
+- [x] **Order Confirmation (`/checkout/success`) & Order History (`/myorders`)**: List user's past purchases and real-time status.
 
 ---
 
-### 🔴 STEP 6: Product Reviews & Ratings
+### 🔵 STEP 6: Product Reviews & Ratings (NEXT STEP)
 - [ ] **Review Section**: Rating breakdown (1-5 stars) on poster detail page.
 - [ ] **Write Review Form**: Star selector, comment text, and image attachment upload.
 - [ ] **Edit / Delete Review**: Manage user's own reviews via `review.api.ts`.
