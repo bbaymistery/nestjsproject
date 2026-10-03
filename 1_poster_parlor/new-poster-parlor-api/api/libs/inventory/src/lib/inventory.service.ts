@@ -249,7 +249,11 @@ export class InventoryService {
 
       // MongoDB güncəlləmə obyektini hazırlayırıq:
       const { ...posterFields } = updateDetails;
-      const updateData: Partial<Poster> = { ...posterFields, };
+      const updateData: Partial<Poster> = { ...posterFields };
+
+      if (updateDetails.isAvailable !== undefined && updateDetails.isAvailable !== null) {
+        updateData.isAvailable = String(updateDetails.isAvailable) === 'true';
+      }
 
       if (hasImageUpdates) updateData.images = finalImages;
 

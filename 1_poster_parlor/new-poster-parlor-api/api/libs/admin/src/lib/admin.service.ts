@@ -179,11 +179,19 @@ export class AdminService {
     }
 
     if (search) {
-      query.$or = [
-        { 'customer.name': { $regex: search, $options: 'i' } },
-        { 'customer.email': { $regex: search, $options: 'i' } },
-        { 'customer.phone': { $regex: search, $options: 'i' } },
+      const cleanSearch = search.replace(/^#/, '').trim();
+      const orConditions: Record<string, unknown>[] = [
+        { 'customer.name': { $regex: cleanSearch, $options: 'i' } },
+        { 'customer.email': { $regex: cleanSearch, $options: 'i' } },
+        { 'customer.phone': { $regex: cleanSearch, $options: 'i' } },
+        { $expr: { $regexMatch: { input: { $toString: '$_id' }, regex: cleanSearch, options: 'i' } } },
       ];
+
+      if (this.isValidObjectId(cleanSearch)) {
+        orConditions.push({ _id: cleanSearch });
+      }
+
+      query.$or = orConditions;
     }
 
     // Build sort

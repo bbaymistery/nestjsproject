@@ -139,4 +139,6 @@ export const OrderSchema = SchemaFactory.createForClass(Order);
 OrderSchema.index({ 'customer.userId': 1, createdAt: -1 });
 OrderSchema.index({ status: 1, createdAt: -1 });
 OrderSchema.index({ 'paymentDetails.transactionId': 1 });
+OrderSchema.index({ createdAt: -1 });
+OrderSchema.index({ isPaid: 1, createdAt: -1 });
 

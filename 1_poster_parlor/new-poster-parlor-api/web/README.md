@@ -64,11 +64,12 @@ Welcome to the **Next.js 16 (App Router)** Frontend client for **ArtisanFrame**!
 
 ---
 
-### 🔵 STEP 7: Admin Control Center (NEXT STEP)
-- [ ] **Admin Dashboard (`/dashboard`)**: Overview stats (Revenue, Orders, Customers).
-- [ ] **Inventory Management**: Create new poster (Multipart FormData upload), edit, soft delete.
-- [ ] **Order Fulfillment Table**: Update order status (`PENDING` ➔ `PROCESSING` ➔ `SHIPPED` ➔ `DELIVERED`).
-- [ ] **Revenue Analytics**: Interactive chart data (`getRevenueAnalytics`).
+### 🟢 STEP 7: Admin Control Center (COMPLETED)
+- [x] **Admin Dashboard (`/dashboard`)**: Overview stats (Revenue, Orders, Customers, Active Products, Fulfillment Pipeline).
+- [x] **Inventory Management**: Create new poster (Cloudinary Multipart FormData upload), edit poster, soft delete (deactivate) & hard delete (`PosterFormModal`, `InventoryManagementView`).
+- [x] **Order Fulfillment Table**: Update order status (`PENDING` ➔ `PROCESSING` ➔ `SHIPPED` ➔ `DELIVERED`), tracking number input, cancellation reason (`OrderStatusModal`, `OrderFulfillmentView`).
+- [x] **Revenue Analytics**: Interactive period selector (Daily, Weekly, Monthly), visual bar chart, and top performing products leaderboard (`RevenueAnalyticsView`).
+- [x] **Customer Base Directory**: Registered user search, purchase history metrics, roles, and status badges (`CustomersListView`).
 
 ---
 
