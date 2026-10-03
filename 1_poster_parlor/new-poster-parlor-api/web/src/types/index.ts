@@ -1,14 +1,13 @@
 // Central type exports
 
-// API Response Types
+// Domain Entity Types
+export * from "./order.types";
+export * from "./review.types";
+export * from "./inventory.types";
+export * from "./admin.types";
+
+// Infrastructure & API Types
 export * from "./api-response.type";
-
-// Stripe Types
 export * from "./stripe.type";
-
-// Component Types
 export * from "./components.type";
-
-// API Documentation Types
 export * from "./api-docs.type";
-

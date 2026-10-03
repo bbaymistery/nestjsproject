@@ -2,136 +2,41 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "./base.query";
 import { buildApiUrl } from "@/lib/helper";
 
-// Poster image interface
-export interface PosterImage {
-  url: string;
-  public_id: string;
-  format?: string;
-  width?: number;
-  height?: number;
-}
+import {
+  PosterImage,
+  PopulatedPoster,
+  OrderItemDto,
+  ShippingAddressDto,
+  PaymentDetailsDto,
+  CustomerInfoDto,
+  CreateOrderDto,
+  OrderStatus,
+  OrderResponse,
+  PaginationInfo,
+  PaginatedOrdersResponse,
+  GetOrdersParams,
+  InitiateStripePaymentDto,
+  InitiateStripePaymentResponse,
+  VerifyStripePaymentDto,
+} from "@/types";
 
-// Populated poster details (when order is fetched with populate)
-export interface PopulatedPoster {
-  _id: string;
-  title: string;
-  images: PosterImage[];
-  dimensions: string;
-  material?: string;
-  category: string;
-}
-
-// Types matching the NestJS backend DTOs
-export interface OrderItemDto {
-  posterId: string | PopulatedPoster; // Can be string or populated poster
-  quantity: number;
-  price: number;
-}
-
-export interface ShippingAddressDto {
-  addressLine1: string;
-  city: string;
-  state: string;
-  pincode: string;
-}
-
-export interface PaymentDetailsDto {
-  method: "STRIPE" | "COD";
-  amount: number;
-  currency: "INR" | "USD";
-  paymentIntentId?: string;
-}
-
-export interface CustomerInfoDto {
-  name: string;
-  email?: string;
-  phone: string;
-  userId?: string;
-}
-
-export interface CreateOrderDto {
-  customer?: CustomerInfoDto;
-  userId?: string;
-  items: { posterId: string; quantity: number; price: number }[];
-  shippingAddress: ShippingAddressDto;
-  paymentDetails: PaymentDetailsDto;
-  status?: string;
-  isPaid?: boolean;
-  shippingCost?: number;
-  taxAmount?: number;
-  totalPrice?: number;
-  notes?: string;
-}
-
-export type OrderStatus = | "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
-
-export interface OrderResponse {
-  _id: string;
-  customer: CustomerInfoDto | null;
-  items: OrderItemDto[];
-  shippingAddress: ShippingAddressDto;
-  paymentDetails: PaymentDetailsDto;
-  status: OrderStatus;
-  isPaid: boolean;
-  shippingCost: number;
-  taxAmount: number;
-  totalPrice: number;
-  notes?: string;
-  trackingNumber?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface PaginationInfo {
-  currentPage: number;
-  totalPages: number;
-  totalOrders: number;
-  limit: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-}
-
-export interface PaginatedOrdersResponse {
-  orders: OrderResponse[];
-  pagination: PaginationInfo;
-}
-
-export interface GetOrdersParams {
-  page?: number;
-  limit?: number;
-}
-
-// ==========================================
-// 💳 STRIPE PAYMENT DTOs (NestJS Backend Integration)
-// ==========================================
-
-export interface InitiateStripePaymentDto {
-  items: { posterId: string; quantity: number; price: number }[];
-  shippingAddress: ShippingAddressDto;
-  shippingCost: number;
-  taxAmount: number;
-  totalPrice: number;
-}
-
-export interface InitiateStripePaymentResponse {
-  clientSecret: string;
-  paymentIntentId: string;
-  amount: number;
-  currency: string;
-}
-
-export interface VerifyStripePaymentDto {
-  paymentIntentId: string;
-  customer?: CustomerInfoDto;
-  items: { posterId: string; quantity: number; price: number }[];
-  shippingAddress: ShippingAddressDto;
-  shippingCost: number;
-  taxAmount: number;
-  totalPrice: number;
-  currency?: string;
-  notes?: string;
-  sandbox?: boolean;
-}
+export type {
+  PosterImage,
+  PopulatedPoster,
+  OrderItemDto,
+  ShippingAddressDto,
+  PaymentDetailsDto,
+  CustomerInfoDto,
+  CreateOrderDto,
+  OrderStatus,
+  OrderResponse,
+  PaginationInfo,
+  PaginatedOrdersResponse,
+  GetOrdersParams,
+  InitiateStripePaymentDto,
+  InitiateStripePaymentResponse,
+  VerifyStripePaymentDto,
+};
 
 export const orderApi = createApi({
   reducerPath: "orderApi",

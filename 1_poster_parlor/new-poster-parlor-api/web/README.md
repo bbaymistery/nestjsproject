@@ -57,14 +57,14 @@ Welcome to the **Next.js 16 (App Router)** Frontend client for **ArtisanFrame**!
 
 ---
 
-### 🔵 STEP 6: Product Reviews & Ratings (NEXT STEP)
-- [ ] **Review Section**: Rating breakdown (1-5 stars) on poster detail page.
-- [ ] **Write Review Form**: Star selector, comment text, and image attachment upload.
-- [ ] **Edit / Delete Review**: Manage user's own reviews via `review.api.ts`.
+### 🟢 STEP 6: Product Reviews & Ratings (COMPLETED)
+- [x] **Review Section & Rating Breakdown**: Overall rating, total count, 1-5 star distribution bars, and rating filter tabs (`PosterReviewsSection`).
+- [x] **Write & Edit Review Form (`ReviewFormModal`)**: Interactive 5-star selector, comment text, and Cloudinary multipart photo upload.
+- [x] **Manage Own Reviews (`ReviewCard`)**: Edit and delete actions for user's own reviews or admin.
 
 ---
 
-### 👑 STEP 7: Admin Control Center
+### 🔵 STEP 7: Admin Control Center (NEXT STEP)
 - [ ] **Admin Dashboard (`/dashboard`)**: Overview stats (Revenue, Orders, Customers).
 - [ ] **Inventory Management**: Create new poster (Multipart FormData upload), edit, soft delete.
 - [ ] **Order Fulfillment Table**: Update order status (`PENDING` ➔ `PROCESSING` ➔ `SHIPPED` ➔ `DELIVERED`).

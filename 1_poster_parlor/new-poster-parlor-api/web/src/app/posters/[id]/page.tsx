@@ -4,6 +4,7 @@ import { use } from "react";
 import Link from "next/link";
 import { useGetInventoryItemByIdQuery } from "@/store/api/inventory.api";
 import { PosterGallery, PosterSpecs } from "@/features/poster-detail/components";
+import { PosterReviewsSection } from "@/features/reviews/components/poster-reviews-section";
 import { ArrowLeft, Loader2, PackageSearch } from "lucide-react";
 
 interface PosterDetailPageProps {
@@ -50,11 +51,11 @@ export default function PosterDetailPage({ params }: PosterDetailPageProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-8 py-10 max-w-6xl">
+    <div className="container mx-auto px-4 sm:px-8 py-10 max-w-6xl space-y-12">
       {/* Back to Catalog Link */}
       <Link
         href="/posters"
-        className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-amber-500 transition-colors mb-8 group"
+        className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-amber-500 transition-colors mb-2 group"
       >
         <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
         <span>Back to Catalog</span>
@@ -65,6 +66,9 @@ export default function PosterDetailPage({ params }: PosterDetailPageProps) {
         <PosterGallery images={poster.images} title={poster.title} />
         <PosterSpecs poster={poster} />
       </div>
+
+      {/* Customer Reviews Section */}
+      <PosterReviewsSection posterId={poster._id} />
     </div>
   );
 }

@@ -278,7 +278,14 @@ export class ReviewService {
 
       // 3. Orta ulduz dərəcəsi və ümumi rəy sayısı
       this.reviewModel.aggregate([
-        { $match: { posterId: new mongoose.Types.ObjectId(posterId) } },
+        {
+          $match: {
+            $or: [
+              { posterId: new mongoose.Types.ObjectId(posterId) },
+              { posterId: posterId },
+            ],
+          },
+        },
         {
           $group: {
             _id: null,
@@ -291,7 +298,14 @@ export class ReviewService {
 
     // 📊 1, 2, 3, 4, 5 ulduz verilən rəylərin paylanmasını hesablayırıq
     const ratingDistribution = await this.reviewModel.aggregate([
-      { $match: { posterId: new mongoose.Types.ObjectId(posterId) } },
+      {
+        $match: {
+          $or: [
+            { posterId: new mongoose.Types.ObjectId(posterId) },
+            { posterId: posterId },
+          ],
+        },
+      },
       {
         $group: {
           _id: '$rating',

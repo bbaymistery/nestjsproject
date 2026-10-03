@@ -8,12 +8,7 @@ export interface InitiateStripePaymentRequest {
   }>;
 }
 
-export interface InitiateStripePaymentResponse {
-  clientSecret: string;
-  paymentIntentId: string;
-  amount: number;
-  currency: string;
-}
+export type { InitiateStripePaymentResponse } from "./order.types";
 
 export interface VerifyStripePaymentRequest {
   paymentIntentId: string;

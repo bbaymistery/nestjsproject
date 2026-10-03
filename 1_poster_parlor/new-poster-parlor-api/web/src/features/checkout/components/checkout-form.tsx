@@ -161,6 +161,7 @@ export function CheckoutForm() {
           taxAmount,
           totalPrice: grandTotal,
           currency: "USD",
+          ...(process.env.NODE_ENV === "development" ? { sandbox: true } : {}),
         }).unwrap();
 
         dispatch(clearCart());
@@ -303,11 +304,10 @@ export function CheckoutForm() {
           <button
             type="button"
             onClick={() => setPaymentMethod("STRIPE")}
-            className={`flex flex-col items-center justify-center p-4 rounded-2xl border text-center transition-all ${
-              paymentMethod === "STRIPE"
+            className={`flex flex-col items-center justify-center p-4 rounded-2xl border text-center transition-all ${paymentMethod === "STRIPE"
                 ? "bg-amber-500/10 border-amber-500 text-amber-400 font-bold"
                 : "bg-secondary/40 border-border/40 text-muted-foreground hover:bg-secondary"
-            }`}
+              }`}
           >
             <CreditCard className="h-6 w-6 mb-2" />
             <span className="text-xs">Stripe Card Payment</span>
@@ -316,11 +316,10 @@ export function CheckoutForm() {
           <button
             type="button"
             onClick={() => setPaymentMethod("COD")}
-            className={`flex flex-col items-center justify-center p-4 rounded-2xl border text-center transition-all ${
-              paymentMethod === "COD"
+            className={`flex flex-col items-center justify-center p-4 rounded-2xl border text-center transition-all ${paymentMethod === "COD"
                 ? "bg-amber-500/10 border-amber-500 text-amber-400 font-bold"
                 : "bg-secondary/40 border-border/40 text-muted-foreground hover:bg-secondary"
-            }`}
+              }`}
           >
             <Banknote className="h-6 w-6 mb-2" />
             <span className="text-xs">Cash on Delivery</span>
