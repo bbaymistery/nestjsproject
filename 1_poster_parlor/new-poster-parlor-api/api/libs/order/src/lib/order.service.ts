@@ -179,14 +179,16 @@ export class OrdersService {
     const validLimit = Math.min(50, Math.max(1, limit));
     const skip = (validPage - 1) * validLimit;
 
-    const totalOrders = await this.orderModel.countDocuments({ 'customer.userId': userId }).exec();
-
-    const orders = await this.orderModel
-      .find({ 'customer.userId': userId })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(validLimit)
-      .exec();
+    const [orders, totalOrders] = await Promise.all([
+      this.orderModel
+        .find({ 'customer.userId': userId })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(validLimit)
+        .lean()
+        .exec(),
+      this.orderModel.countDocuments({ 'customer.userId': userId }).exec(),
+    ]);
 
     const totalPages = Math.ceil(totalOrders / validLimit);
 

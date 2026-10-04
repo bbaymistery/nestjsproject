@@ -64,7 +64,9 @@ export const inventoryApi = createApi({
 
         Object.entries(itemDetails).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
-            if (Array.isArray(value)) {
+            if (typeof value === "boolean") {
+              formData.append(key, value ? "true" : "false");
+            } else if (Array.isArray(value)) {
               formData.append(key, JSON.stringify(value));
             } else {
               formData.append(key, value.toString());
@@ -156,7 +158,9 @@ export const inventoryApi = createApi({
 
         Object.entries(updateDetails).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
-            if (Array.isArray(value)) {
+            if (typeof value === "boolean") {
+              formData.append(key, value ? "true" : "false");
+            } else if (Array.isArray(value)) {
               formData.append(key, JSON.stringify(value));
             } else {
               formData.append(key, value.toString());

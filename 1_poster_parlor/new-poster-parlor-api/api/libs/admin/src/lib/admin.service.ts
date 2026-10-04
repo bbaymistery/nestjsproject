@@ -78,6 +78,7 @@ export class AdminService {
       lastMonthRevenue,
       lastMonthOrders,
       lastMonthCustomers,
+      totalRevenueResult,
     ] = await Promise.all([
       this.orderModel.countDocuments(),
       this.userModel.countDocuments(),
@@ -106,12 +107,10 @@ export class AdminService {
       this.userModel.countDocuments({
         createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth },
       }),
-    ]);
-
-    // Get total revenue
-    const totalRevenueResult = await this.orderModel.aggregate([
-      { $match: { isPaid: true } },
-      { $group: { _id: null, total: { $sum: '$totalPrice' } } },
+      this.orderModel.aggregate([
+        { $match: { isPaid: true } },
+        { $group: { _id: null, total: { $sum: '$totalPrice' } } },
+      ]),
     ]);
 
     // Map status counts
@@ -161,7 +160,8 @@ export class AdminService {
         model: 'Poster',
         select: 'title images',
       })
-      .exec();
+      .lean()
+      .exec() as any;
   }
 
   /**
@@ -213,6 +213,7 @@ export class AdminService {
           model: 'Poster',
           select: 'title images',
         })
+        .lean()
         .exec(),
       this.orderModel.countDocuments(query),
     ]);
@@ -408,6 +409,7 @@ export class AdminService {
    */
   async getTopSellingProducts(limit: number = 10) {
     const topProducts = await this.orderModel.aggregate([
+      { $match: { status: { $ne: OrderStatus.CANCELLED } } },
       { $unwind: '$items' },
       {
         $group: {

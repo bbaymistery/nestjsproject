@@ -6,6 +6,7 @@ import {
   useGetAllInventoryQuery,
   useSoftDeleteInventoryItemMutation,
   useDeleteInventoryItemMutation,
+  useUpdateInventoryItemMutation,
 } from "@/store/api/inventory.api";
 import { PosterFormModal } from "./poster-form-modal";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ import {
   Loader2,
   Layers,
   Sparkles,
+  Power,
 } from "lucide-react";
 
 export const InventoryManagementView: React.FC = () => {
@@ -43,6 +45,7 @@ export const InventoryManagementView: React.FC = () => {
 
   const [softDelete] = useSoftDeleteInventoryItemMutation();
   const [hardDelete] = useDeleteInventoryItemMutation();
+  const [updatePoster] = useUpdateInventoryItemMutation();
 
   const posters = data?.data?.posters || [];
   const pagination = data?.data?.pagination;
@@ -57,14 +60,21 @@ export const InventoryManagementView: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleSoftDelete = async (poster: Poster) => {
-    if (confirm(`Are you sure you want to deactivate "${poster.title}"?`)) {
-      try {
+  const handleToggleStatus = async (poster: Poster) => {
+    const isActivating = !poster.isAvailable;
+    try {
+      if (isActivating) {
+        await updatePoster({
+          id: poster._id,
+          updateDetails: { isAvailable: true },
+        }).unwrap();
+        toast.success(`Poster "${poster.title}" activated successfully.`);
+      } else {
         await softDelete(poster._id).unwrap();
-        toast.success(`Poster "${poster.title}" deactivated.`);
-      } catch (err: any) {
-        toast.error("Failed to deactivate poster.");
+        toast.success(`Poster "${poster.title}" deactivated successfully.`);
       }
+    } catch (err: any) {
+      toast.error(err?.data?.message || `Failed to ${isActivating ? "activate" : "deactivate"} poster.`);
     }
   };
 
@@ -255,11 +265,19 @@ export const InventoryManagementView: React.FC = () => {
                           <Edit2 className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleSoftDelete(poster)}
-                          title="Deactivate"
-                          className="p-2 rounded-xl bg-secondary hover:bg-yellow-500/20 text-muted-foreground hover:text-yellow-400 transition-all cursor-pointer"
+                          onClick={() => handleToggleStatus(poster)}
+                          title={poster.isAvailable ? "Deactivate Poster" : "Activate Poster"}
+                          className={`p-2 rounded-xl bg-secondary transition-all cursor-pointer ${
+                            poster.isAvailable
+                              ? "hover:bg-yellow-500/20 text-muted-foreground hover:text-yellow-400"
+                              : "hover:bg-emerald-500/20 text-muted-foreground hover:text-emerald-400"
+                          }`}
                         >
-                          <AlertTriangle className="h-4 w-4" />
+                          {poster.isAvailable ? (
+                            <AlertTriangle className="h-4 w-4 text-yellow-400" />
+                          ) : (
+                            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                          )}
                         </button>
                         <button
                           onClick={() => handleHardDelete(poster)}

@@ -248,19 +248,28 @@ export class InventoryService {
       }
 
       // MongoDB güncəlləmə obyektini hazırlayırıq:
-      const { ...posterFields } = updateDetails;
+      const { imagesToDelete, imageAction, ...posterFields } = updateDetails as any;
       const updateData: Partial<Poster> = { ...posterFields };
 
       if (updateDetails.isAvailable !== undefined && updateDetails.isAvailable !== null) {
-        updateData.isAvailable = String(updateDetails.isAvailable) === 'true';
+        updateData.isAvailable =
+          updateDetails.isAvailable === true ||
+          String(updateDetails.isAvailable) === 'true';
+      }
+
+      if (updateDetails.price !== undefined) {
+        updateData.price = Number(updateDetails.price);
+      }
+
+      if (updateDetails.stock !== undefined) {
+        updateData.stock = Number(updateDetails.stock);
       }
 
       if (hasImageUpdates) updateData.images = finalImages;
 
-
       const updatedPoster = await this.posterModel.findByIdAndUpdate(
         id,
-        updateData,
+        { $set: updateData },
         { new: true, runValidators: true }
       );
 

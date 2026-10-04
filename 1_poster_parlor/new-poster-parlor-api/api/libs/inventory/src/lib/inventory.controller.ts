@@ -152,6 +152,11 @@ export class InventoryController {
   ) {
     const newImages = files.images || [];
 
+    const rawIsAvailable = (updateDetails as any).isAvailable;
+    if (rawIsAvailable !== undefined && rawIsAvailable !== null) {
+      updateDetails.isAvailable = rawIsAvailable === true || rawIsAvailable === 'true';
+    }
+
     const updatedPoster = await this.inventoryService.updateInventoryItem(
       id,
       newImages,

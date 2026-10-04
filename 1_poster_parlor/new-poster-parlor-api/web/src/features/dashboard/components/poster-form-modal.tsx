@@ -15,6 +15,8 @@ import {
   Sparkles,
   Loader2,
   Image as ImageIcon,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 
 interface PosterFormModalProps {
@@ -68,7 +70,10 @@ export const PosterFormModal: React.FC<PosterFormModalProps> = ({
       setPrice(posterToEdit.price ?? 0);
       setStock(posterToEdit.stock ?? 0);
       setMaterial("Premium Matte Paper (250gsm)");
-      setIsAvailable(posterToEdit.isAvailable ?? true);
+      setIsAvailable(
+        posterToEdit.isAvailable === true ||
+          String(posterToEdit.isAvailable) === "true"
+      );
       setTags(posterToEdit.tags || []);
       setImagePreviews(posterToEdit.images?.map((img) => img.url) || []);
       setImagesToDelete([]);
@@ -319,17 +324,21 @@ export const PosterFormModal: React.FC<PosterFormModalProps> = ({
               />
             </div>
 
-            <div className="flex items-center gap-3 pt-6">
-              <input
-                type="checkbox"
-                id="isAvailable"
-                checked={isAvailable}
-                onChange={(e) => setIsAvailable(e.target.checked)}
-                className="h-5 w-5 rounded border-border/50 text-amber-500 focus:ring-amber-500 accent-amber-500 cursor-pointer"
-              />
-              <label htmlFor="isAvailable" className="text-sm font-semibold text-foreground cursor-pointer">
-                Available for Purchase in Store
-              </label>
+            <div className="flex items-center justify-between pt-6 border-t border-border/30">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Store Status
+              </span>
+              {isAvailable ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Available for Purchase (Active)
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                  <XCircle className="h-3.5 w-3.5" />
+                  Disabled in Store
+                </span>
+              )}
             </div>
           </div>
 
